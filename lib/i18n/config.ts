@@ -6,6 +6,7 @@ export type Messages = {
   app: { name: string };
   nav: {
     workouts: string;
+    history: string;
     exercises: string;
     settings: string;
     signOut: string;
@@ -45,6 +46,39 @@ export type Messages = {
   offline: {
     readonly: string;
   };
+  history: {
+    title: string;
+    lastSynced: string;
+    rangeLabel: string;
+    range: {
+      "7d": string;
+      "30d": string;
+    };
+    refresh: string;
+    trend: {
+      title: string;
+      volume: string;
+    };
+    summary: {
+      title: string;
+      activeRange: string;
+      "7d": string;
+      "30d": string;
+    };
+    empty: {
+      title: string;
+      description: string;
+    };
+    entry: {
+      sets: string;
+      reps: string;
+      volume: string;
+    };
+    tooltip: {
+      label: string;
+      volume: string;
+    };
+  };
 };
 
 const messages: Record<Locale, Messages> = {
@@ -52,6 +86,7 @@ const messages: Record<Locale, Messages> = {
     app: { name: "Strong Web" },
     nav: {
       workouts: "Workouts",
+      history: "History",
       exercises: "Exercises",
       settings: "Settings",
       signOut: "Sign out",
@@ -91,11 +126,45 @@ const messages: Record<Locale, Messages> = {
     offline: {
       readonly: "You are offline. Changes will be available when connection is restored.",
     },
+    history: {
+      title: "History",
+      lastSynced: "Last synced {timestamp}",
+      rangeLabel: "Range",
+      range: {
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+      },
+      refresh: "Refresh",
+      trend: {
+        title: "Training trend",
+        volume: "Training volume",
+      },
+      summary: {
+        title: "Summary",
+        activeRange: "Selected range",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+      },
+      empty: {
+        title: "No sessions yet",
+        description: "Your recent workouts will appear here once you start logging entries.",
+      },
+      entry: {
+        sets: "Sets",
+        reps: "Reps",
+        volume: "Volume",
+      },
+      tooltip: {
+        label: "Total volume",
+        volume: "kg",
+      },
+    },
   },
   zh: {
     app: { name: "Strong Web" },
     nav: {
       workouts: "訓練",
+      history: "歷史",
       exercises: "動作庫",
       settings: "設定",
       signOut: "登出",
@@ -134,6 +203,39 @@ const messages: Record<Locale, Messages> = {
     },
     offline: {
       readonly: "目前處於離線狀態，變更將在連線恢復後可用。",
+    },
+    history: {
+      title: "歷史紀錄",
+      lastSynced: "最後同步時間 {timestamp}",
+      rangeLabel: "範圍",
+      range: {
+        "7d": "最近 7 天",
+        "30d": "最近 30 天",
+      },
+      refresh: "重新整理",
+      trend: {
+        title: "訓練趨勢",
+        volume: "訓練量",
+      },
+      summary: {
+        title: "摘要",
+        activeRange: "選定範圍",
+        "7d": "最近 7 天",
+        "30d": "最近 30 天",
+      },
+      empty: {
+        title: "尚無訓練紀錄",
+        description: "開始紀錄訓練後，最新的訓練紀錄將顯示在這裡。",
+      },
+      entry: {
+        sets: "組數",
+        reps: "次數",
+        volume: "總訓練量",
+      },
+      tooltip: {
+        label: "總訓練量",
+        volume: "公斤",
+      },
     },
   },
 };

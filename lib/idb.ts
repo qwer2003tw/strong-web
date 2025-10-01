@@ -4,6 +4,14 @@ const DB_NAME = "strong-web-cache";
 const STORE_NAME = "readonly";
 const DB_VERSION = 1;
 
+export type HistoryCacheRange = "7d" | "30d";
+
+export function historySnapshotKey(range: HistoryCacheRange) {
+  return `history:snapshot:${range}`;
+}
+
+export const HISTORY_SUMMARY_CACHE_KEY = "history:summary";
+
 interface CacheEntry<T> {
   value: T;
   updatedAt: number;
