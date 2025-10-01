@@ -2,6 +2,19 @@
 
 本文根據 README 中的 MoSCoW 需求清單，將 Strong Web MVP 的核心能力拆分為模組。每一模組皆描述了目標、細項需求、跨模組邊界、預期介面、資產需求與驗收指標，以利產品、工程與設計團隊協作與排程。
 
+## 進度追蹤表
+
+| 模組 | 狀態 | 目前進度亮點 | 待辦 / 差距 |
+| --- | --- | --- | --- |
+| Auth 模組 | 進行中 | 受保護頁面會在無 Session 時轉導至登入頁，並透過 Supabase session provider 提供 email/password 與 GitHub、Google OAuth 流程。 【F:app/(dashboard)/layout.tsx†L1-L24】【F:app/(auth)/sign-in/page.tsx†L1-L23】【F:components/features/auth/sign-in-form.tsx†L1-L121】【F:components/features/auth/sign-up-form.tsx†L1-L92】 | 尚未補齊 Apple OAuth 與重設密碼等 Must 項需求。 【F:docs/feature-breakdown.md†L24-L26】 |
+| Workout / Exercise CRUD 模組 | 進行中 | 已提供訓練列表、新增表單與狀態統計圖表，並在詳情頁支援更新、刪除與動作項目 CRUD，同時透過 IndexedDB 快取與 API route 連結 Supabase。 【F:components/features/workouts/workouts-dashboard.tsx†L1-L200】【F:components/features/workouts/workout-detail.tsx†L1-L355】【F:app/api/workouts/route.ts†L1-L68】【F:app/api/workouts/[id]/route.ts†L1-L115】【F:lib/idb.ts†L1-L52】 | Routine/Plan、自動套用與第三方匯入仍未實作。 【F:docs/feature-breakdown.md†L53-L55】 |
+| 歷史與統計模組 | 尚未開始 | 目前僅在訓練儀表板顯示簡易狀態長條圖，尚無專屬歷史頁面或分析 API。 【F:components/features/workouts/workouts-dashboard.tsx†L185-L200】【d448a7†L1-L1】 | 需補足歷史清單、統計圖表與衝突解決等 Must/Should 項目。 【F:docs/feature-breakdown.md†L83-L85】 |
+| PWA / 離線模組 | 進行中 | 專案整合 next-pwa、提供自訂 Service Worker 與 manifest，並以離線橫幅與 IndexedDB 快取支援基本離線體驗。 【F:next.config.js†L1-L25】【F:public/sw.js†L1-L46】【F:public/manifest.json†L1-L16】【F:components/features/offline/offline-banner.tsx†L1-L30】【F:lib/idb.ts†L1-L52】 | 背景同步、離線衝突處理與通知策略仍待完成。 【F:docs/feature-breakdown.md†L109-L122】 |
+| 設定與偏好模組 | 進行中 | 設定頁可更新名稱、語系、單位與主題，並支援匯出訓練資料。 【F:app/(dashboard)/settings/page.tsx†L1-L34】【F:components/features/settings/settings-panel.tsx†L1-L153】【F:app/api/export/route.ts†L1-L40】 | 通知偏好、多語系內容覆蓋與可及性最佳化尚未著手。 【F:docs/feature-breakdown.md†L138-L140】 |
+| 外部 API / 整合模組 | 尚未開始 | 目前僅有內部使用的 workouts、exercises 與 export API route。 【F:app/api/workouts/route.ts†L1-L68】【F:app/api/exercises/route.ts†L1-L62】【F:app/api/export/route.ts†L1-L40】 | 公開 REST/GraphQL 端點與匯入 webhook 尚未實作。 【F:docs/feature-breakdown.md†L165-L167】 |
+| 監控與安全模組 | 尚未開始 | API 僅進行基本的 Supabase 身分驗證，尚無審計、匯出或監控串接。 【F:app/api/workouts/route.ts†L6-L27】【F:app/api/exercises/route.ts†L4-L26】【7c934d†L1-L4】 | RLS 策略、審計日誌與安全匯出流程需依需求補強。 【F:docs/feature-breakdown.md†L193-L195】 |
+| 部署 / DevOps 模組 | 進行中 | 已配置 next-pwa 與前端腳本（lint、test、type-check），具備基本開發與建置流程。 【F:next.config.js†L1-L25】【F:package.json†L1-L46】 | CI/CD、自動化備份與回復演練仍未建立。 【F:docs/feature-breakdown.md†L220-L222】 |
+
 ## Auth 模組
 ### 目標與產出
 - 透過 Supabase Auth 提供穩定的帳號註冊、登入、重設密碼與多家社群登入。
