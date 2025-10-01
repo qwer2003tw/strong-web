@@ -15,7 +15,11 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   if (!session) {
-    redirect("/sign-in");
+    if (process.env.E2E_BYPASS_AUTH === "true") {
+      // Allow dashboard pages to render without redirect during end-to-end tests.
+    } else {
+      redirect("/sign-in");
+    }
   }
 
   return (
