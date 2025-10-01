@@ -2,6 +2,19 @@
 
 本文根據 README 中的 MoSCoW 需求清單，將 Strong Web MVP 的核心能力拆分為模組。每一模組皆描述了目標、細項需求、跨模組邊界、預期介面、資產需求與驗收指標，以利產品、工程與設計團隊協作與排程。
 
+## 進度追蹤表
+
+| 模組 | 狀態 | 已完成功能 | 主要缺口 |
+| --- | --- | --- | --- |
+| Auth 模組 | 進行中 | - 儀表板路由會檢查 Supabase session，未登入者轉導並提供登出控制。<br>- 登入/註冊表單支援 Email/Password 與 GitHub、Google OAuth。 【F:app/(dashboard)/layout.tsx†L1-L29】【F:components/features/navigation/sign-out-button.tsx†L1-L31】【F:components/features/auth/sign-in-form.tsx†L14-L119】【F:components/features/auth/sign-up-form.tsx†L14-L117】 | - OAuth provider 陣列僅含 GitHub、Google，缺少 Apple 登入與密碼重設流程；`(auth)` 路由僅有登入/註冊頁。 【F:components/features/auth/sign-in-form.tsx†L14-L118】【F:components/features/auth/sign-up-form.tsx†L14-L116】【34593f†L1-L1】 |
+| Workout / Exercise CRUD 模組 | 進行中 | - 儀表板支援建立訓練、狀態統計圖與列表，並透過 IndexedDB 快取與 API 同步。<br>- 詳情頁可更新、刪除訓練並以 Supabase CRUD 動作項目。<br>- 動作庫提供表單與 `/api/exercises` 寫入。 【F:components/features/workouts/workouts-dashboard.tsx†L1-L236】【F:components/features/workouts/workout-detail.tsx†L1-L356】【F:components/features/exercises/exercise-library.tsx†L1-L152】【F:app/api/workouts/route.ts†L1-L68】【F:app/api/workouts/[id]/route.ts†L1-L115】【F:app/api/exercises/route.ts†L1-L62】【F:lib/idb.ts†L1-L52】 | - 訓練項目表單僅含 sets/reps/weight/unit/notes，缺少 RPE 與 Routine/Plan、自動套用等流程。 【F:components/features/workouts/workout-detail.tsx†L259-L349】 |
+| 歷史與統計模組 | 尚未開始 | - 現階段僅在訓練儀表板顯示各狀態長條圖。 【F:components/features/workouts/workouts-dashboard.tsx†L185-L199】 | - 缺少專屬歷史頁面、API 與衝突處理；`app/(dashboard)` 目前僅含 workouts、exercises、settings 目錄，也查無 history/analytics 程式。 【97d6d9†L1-L1】【51cba9†L1-L1】 |
+| PWA / 離線模組 | 進行中 | - 透過 next-pwa 註冊自訂 Service Worker 與 manifest。<br>- Offline Banner 與 IndexedDB 快取提供基本離線提示與資料暫存。 【F:next.config.js†L1-L25】【F:public/sw.js†L1-L46】【F:public/manifest.json†L1-L17】【F:components/features/offline/offline-banner.tsx†L1-L30】【F:lib/idb.ts†L1-L52】 | - Service Worker 目前僅快取 GET 請求，尚無背景同步、衝突解決或通知策略。 【F:public/sw.js†L24-L45】 |
+| 設定與偏好模組 | 進行中 | - 設定頁可更新暱稱、語系、單位與主題並寫回 Supabase。<br>- 支援匯出 workouts、exercises JSON。 【F:components/features/settings/settings-panel.tsx†L24-L154】【F:app/api/export/route.ts†L1-L40】 | - 介面僅涵蓋姓名/語系/單位/主題與匯出，尚未包含通知偏好、快捷鍵或完整多語覆蓋。 【F:components/features/settings/settings-panel.tsx†L89-L150】 |
+| 外部 API / 整合模組 | 尚未開始 | - 目前僅提供 workouts、exercises、export API route 供內部使用。 【F:app/api/workouts/route.ts†L1-L68】【F:app/api/exercises/route.ts†L1-L62】【F:app/api/export/route.ts†L1-L40】 | - `app/api` 目錄僅含上述三個端點，尚無公開 REST/GraphQL 或匯入 webhook。 【382240†L1-L1】 |
+| 監控與安全模組 | 尚未開始 | - API 層僅透過 Supabase `getUser` 進行基本授權檢查。 【F:app/api/workouts/route.ts†L6-L27】【F:app/api/exercises/route.ts†L4-L25】【F:app/api/export/route.ts†L4-L13】 | - 未整合 RLS 策略、審計日誌或監控工具，程式碼查詢僅見需求描述。 【32b0a7†L1-L3】 |
+| 部署 / DevOps 模組 | 進行中 | - 已配置 next-pwa 並在 package.json 提供 lint、type-check、test 等開發腳本。 【F:next.config.js†L1-L25】【F:package.json†L1-L46】 | - 專案缺少 CI/CD 或部署設定檔，儲存庫根目錄未見 `.github` 等自動化配置。 【8ee072†L1-L3】 |
+
 ## Auth 模組
 ### 目標與產出
 - 透過 Supabase Auth 提供穩定的帳號註冊、登入、重設密碼與多家社群登入。
