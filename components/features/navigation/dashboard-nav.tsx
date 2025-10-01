@@ -9,6 +9,7 @@ import { SignOutButton } from "@/components/features/navigation/sign-out-button"
 
 const links = [
   { href: "/workouts", label: "nav.workouts" },
+  { href: "/history", label: "nav.history" },
   { href: "/exercises", label: "nav.exercises" },
   { href: "/settings", label: "nav.settings" },
 ];
