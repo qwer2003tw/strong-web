@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type { Database, ThemePreference, UnitSystem } from "@/lib/database.types";
 import { useSupabaseClient } from "@/components/features/providers/supabase-session-provider";
 import { useTheme } from "@/components/features/providers/theme-provider";
@@ -33,6 +33,28 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const readOnly = !userId;
+  const successStorageKey = "strong-web-settings-success";
+
+  useEffect(() => {
+    if (typeof window === "undefined" || message) {
+      return;
+    }
+
+    if (typeof document !== "undefined") {
+      const toastMessage = document.body.dataset.settingsToast;
+      if (toastMessage) {
+        setMessage(toastMessage);
+        delete document.body.dataset.settingsToast;
+        return;
+      }
+    }
+
+    const storedMessage = window.localStorage.getItem(successStorageKey);
+    if (storedMessage) {
+      setMessage(storedMessage);
+      window.localStorage.removeItem(successStorageKey);
+    }
+  }, [message, successStorageKey]);
 
   async function handleProfileSave() {
     setError(null);
@@ -52,12 +74,23 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
     });
 
     if (upsertError) {
+      console.error("Profile save failed", upsertError);
       setError(upsertError.message);
       return;
     }
 
     setMessage("Settings updated");
-    router.refresh();
+    if (typeof document !== "undefined") {
+      document.body.dataset.settingsToast = "Settings updated";
+    }
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(successStorageKey, "Settings updated");
+      window.setTimeout(() => {
+        router.refresh();
+      }, 500);
+    } else {
+      router.refresh();
+    }
   }
 
   async function handleExport() {
