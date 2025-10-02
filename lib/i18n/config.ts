@@ -19,6 +19,16 @@ export type Messages = {
     oauth: string;
     noAccount: string;
     haveAccount: string;
+    forgotPassword: string;
+    forgotPasswordDescription: string;
+    resetPassword: string;
+    resetPasswordDescription: string;
+    sendResetEmail: string;
+    checkEmail: string;
+    resetEmailSent: string;
+    backToSignIn: string;
+    newPassword: string;
+    confirmPassword: string;
   };
   workouts: {
     title: string;
@@ -99,6 +109,16 @@ const messages: Record<Locale, Messages> = {
       oauth: "Continue with",
       noAccount: "Don't have an account?",
       haveAccount: "Already have an account?",
+      forgotPassword: "Forgot password?",
+      forgotPasswordDescription: "Enter your email and we'll send you a link to reset your password.",
+      resetPassword: "Reset password",
+      resetPasswordDescription: "Enter your new password below.",
+      sendResetEmail: "Send reset email",
+      checkEmail: "Check your email",
+      resetEmailSent: "We've sent you an email with instructions to reset your password.",
+      backToSignIn: "Back to sign in",
+      newPassword: "New password",
+      confirmPassword: "Confirm password",
     },
     workouts: {
       title: "Your workouts",
@@ -177,6 +197,16 @@ const messages: Record<Locale, Messages> = {
       oauth: "使用以下帳號登入",
       noAccount: "還沒有帳號嗎？",
       haveAccount: "已經有帳號了嗎？",
+      forgotPassword: "忘記密碼？",
+      forgotPasswordDescription: "輸入您的電子郵件，我們將寄送重設密碼的連結給您。",
+      resetPassword: "重設密碼",
+      resetPasswordDescription: "請在下方輸入您的新密碼。",
+      sendResetEmail: "發送重設郵件",
+      checkEmail: "請檢查您的電子郵件",
+      resetEmailSent: "我們已寄送重設密碼的說明郵件給您。",
+      backToSignIn: "返回登入",
+      newPassword: "新密碼",
+      confirmPassword: "確認密碼",
     },
     workouts: {
       title: "你的訓練",

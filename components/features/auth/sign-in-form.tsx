@@ -87,7 +87,12 @@ export function SignInForm() {
           <Input id="email" name="email" type="email" autoComplete="email" required disabled={pending} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">{t("auth.password")}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">{t("auth.password")}</Label>
+            <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+              {t("auth.forgotPassword")}
+            </Link>
+          </div>
           <Input
             id="password"
             name="password"
