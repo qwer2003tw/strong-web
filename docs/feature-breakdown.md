@@ -4,16 +4,87 @@
 
 ## 進度追蹤表
 
-| 模組 | 狀態 | 目前進度亮點 | 待辦 / 差距 |
-| --- | --- | --- | --- |
-| Auth 模組 | 進行中 | 受保護頁面會在無 Session 時轉導至登入頁，並透過 Supabase session provider 提供 email/password 與 GitHub、Google OAuth 流程。 【F:app/(dashboard)/layout.tsx†L1-L24】【F:app/(auth)/sign-in/page.tsx†L1-L23】【F:components/features/auth/sign-in-form.tsx†L1-L121】【F:components/features/auth/sign-up-form.tsx†L1-L92】 | 尚未補齊 Apple OAuth 與重設密碼等 Must 項需求。 【F:docs/feature-breakdown.md†L24-L26】 |
-| Workout / Exercise CRUD 模組 | 進行中 | 已提供訓練列表、新增表單與狀態統計圖表，並在詳情頁支援更新、刪除與動作項目 CRUD，同時透過 IndexedDB 快取與 API route 連結 Supabase。 【F:components/features/workouts/workouts-dashboard.tsx†L1-L200】【F:components/features/workouts/workout-detail.tsx†L1-L355】【F:app/api/workouts/route.ts†L1-L68】【F:app/api/workouts/[id]/route.ts†L1-L115】【F:lib/idb.ts†L1-L52】 | Routine/Plan、自動套用與第三方匯入仍未實作。 【F:docs/feature-breakdown.md†L53-L55】 |
-| 歷史與統計模組 | 進行中 | 歷史儀表板提供 7/30 日訓練趨勢、量化摘要與歷史列表，支援範圍切換、手動刷新與 IndexedDB 快取。 【F:app/(dashboard)/history/page.tsx†L1-L69】【F:components/features/history/history-dashboard.tsx†L29-L193】【F:lib/history.ts†L65-L205】【F:app/api/history/route.ts†L1-L48】【F:app/api/analytics/volume/route.ts†L1-L24】 | 尚缺離線衝突解決、1RM/進階分析 API 與報表流程。 【F:docs/feature-breakdown.md†L83-L103】 |
-| PWA / 離線模組 | 進行中 | 專案整合 next-pwa、提供自訂 Service Worker 與 manifest，並以離線橫幅與 IndexedDB 快取支援基本離線體驗。 【F:next.config.js†L1-L25】【F:public/sw.js†L1-L46】【F:public/manifest.json†L1-L16】【F:components/features/offline/offline-banner.tsx†L1-L30】【F:lib/idb.ts†L1-L52】 | 背景同步、離線衝突處理與通知策略仍待完成。 【F:docs/feature-breakdown.md†L109-L122】 |
-| 設定與偏好模組 | 進行中 | 設定頁可更新名稱、語系、單位與主題，並支援匯出訓練資料。 【F:app/(dashboard)/settings/page.tsx†L1-L34】【F:components/features/settings/settings-panel.tsx†L1-L153】【F:app/api/export/route.ts†L1-L40】 | 通知偏好、多語系內容覆蓋與可及性最佳化尚未著手。 【F:docs/feature-breakdown.md†L138-L140】 |
-| 外部 API / 整合模組 | 尚未開始 | 目前僅有內部使用的 workouts、exercises 與 export API route。 【F:app/api/workouts/route.ts†L1-L68】【F:app/api/exercises/route.ts†L1-L62】【F:app/api/export/route.ts†L1-L40】 | 公開 REST/GraphQL 端點與匯入 webhook 尚未實作。 【F:docs/feature-breakdown.md†L165-L167】 |
-| 監控與安全模組 | 尚未開始 | API 僅進行基本的 Supabase 身分驗證，尚無審計、匯出或監控串接。 【F:app/api/workouts/route.ts†L6-L27】【F:app/api/exercises/route.ts†L4-L26】【7c934d†L1-L4】 | RLS 策略、審計日誌與安全匯出流程需依需求補強。 【F:docs/feature-breakdown.md†L193-L195】 |
-| 部署 / DevOps 模組 | 進行中 | 已配置 next-pwa 與前端腳本（lint、test、type-check），具備基本開發與建置流程。 【F:next.config.js†L1-L25】【F:package.json†L1-L46】 | CI/CD、自動化備份與回復演練仍未建立。 【F:docs/feature-breakdown.md†L220-L222】 |
+| 模組 | 狀態 | 已完成項目 | 待辦項目 |
+| --- | :---: | --- | --- |
+| 🔐 Auth 模組 | 🚧 | ✅ Email/Password 登入<br>✅ OAuth (GitHub, Google)<br>✅ 密碼重設流程（含雙語介面）<br>✅ Session 管理與頁面保護 | ⏳ Apple OAuth |
+| 💪 Workout / Exercise CRUD | 🚧 | ✅ 訓練列表與 CRUD<br>✅ 動作庫管理<br>✅ 詳情頁編輯<br>✅ IndexedDB 快取<br>✅ API routes 整合 | ⏳ Routine/Plan 功能<br>⏳ 自動套用模板<br>⏳ 第三方匯入 |
+| 📊 歷史與統計模組 | 🚧 | ✅ 歷史列表<br>✅ 7/30 日訓練趨勢<br>✅ Recharts 圖表<br>✅ 範圍切換<br>✅ IndexedDB 快取 | ⏳ 離線衝突解決<br>⏳ 1RM 估算<br>⏳ 進階分析 API<br>⏳ 報表匯出 |
+| 📱 PWA / 離線模組 | 🚧 | ✅ PWA 配置 (next-pwa)<br>✅ Service Worker<br>✅ Manifest<br>✅ 離線橫幅<br>✅ IndexedDB 快取 | ⏳ 背景同步<br>⏳ 離線衝突處理<br>⏳ 通知策略 |
+| ⚙️ 設定與偏好模組 | 🚧 | ✅ 單位切換 (kg/lb)<br>✅ 主題切換<br>✅ 個人資料編輯<br>✅ 多語系 (zh-TW/en)<br>✅ 訓練資料匯出 | ⏳ 通知偏好<br>⏳ 可及性最佳化 (WCAG 2.1 AA) |
+| 🔌 外部 API / 整合模組 | ❌ | ✅ 內部 API routes (基礎) | ⏳ 公開 REST API<br>⏳ GraphQL 端點<br>⏳ 匯入 webhook |
+| 🔒 監控與安全模組 | 🚧 | ✅ Supabase 身分驗證<br>✅ Row Level Security (RLS)<br>✅ 16 個安全策略<br>✅ SQL 遷移腳本 | ⏳ 審計日誌<br>⏳ Rate Limit<br>⏳ 進階監控 (Sentry/PostHog) |
+| 🚀 部署 / DevOps 模組 | 🚧 | ✅ next-pwa 配置<br>✅ 基本腳本 (lint/test/type-check)<br>✅ Jest 單元測試 (13 個)<br>✅ Playwright E2E (6 個) | ⏳ CI/CD 流程<br>⏳ 自動化備份<br>⏳ 回復演練 |
+
+**圖示說明：**
+- 🚧 進行中
+- ❌ 尚未開始
+- ✅ 已完成
+- ⏳ 待辦
+
+### 📁 相關檔案引用
+
+#### 🔐 Auth 模組
+- **密碼重設表單：** `components/features/auth/forgot-password-form.tsx`
+- **重設密碼表單：** `components/features/auth/reset-password-form.tsx`
+- **登入表單：** `components/features/auth/sign-in-form.tsx`
+- **註冊表單：** `components/features/auth/sign-up-form.tsx`
+- **忘記密碼頁面：** `app/(auth)/forgot-password/page.tsx`
+- **重設密碼頁面：** `app/(auth)/reset-password/page.tsx`
+- **單元測試：** `tests/unit/forgotPasswordForm.test.tsx`
+- **E2E 測試：** `tests/e2e/password-reset.spec.ts`, `tests/e2e/auth.spec.ts`
+
+#### 💪 Workout / Exercise CRUD 模組
+- **訓練儀表板：** `components/features/workouts/workouts-dashboard.tsx`
+- **訓練詳情：** `components/features/workouts/workout-detail.tsx`
+- **動作庫：** `components/features/exercises/exercise-library.tsx`
+- **API Routes：** `app/api/workouts/route.ts`, `app/api/workouts/[id]/route.ts`, `app/api/exercises/route.ts`
+- **IndexedDB：** `lib/idb.ts`
+- **單元測試：** `tests/unit/workoutsDashboard.test.tsx`, `tests/unit/workoutDetail.test.tsx`, `tests/unit/workoutsApi.test.ts`, `tests/unit/exerciseLibrary.test.tsx`, `tests/unit/exercisesRoute.test.ts`
+- **E2E 測試：** `tests/e2e/workouts.spec.ts`, `tests/e2e/exercises.spec.ts`
+
+#### 📊 歷史與統計模組
+- **歷史儀表板：** `components/features/history/history-dashboard.tsx`
+- **歷史列表：** `components/features/history/history-list.tsx`
+- **歷史篩選器：** `components/features/history/history-filters.tsx`
+- **趨勢圖表：** `components/features/history/history-trend-chart.tsx`
+- **歷史頁面：** `app/(dashboard)/history/page.tsx`
+- **歷史工具函式：** `lib/history.ts`
+- **API Routes：** `app/api/history/route.ts`, `app/api/analytics/volume/route.ts`
+- **單元測試：** `tests/unit/historyDashboard.test.tsx`, `tests/unit/historyAnalytics.test.ts`, `tests/unit/historyRouteHandlers.test.ts`
+- **E2E 測試：** `tests/e2e/history.spec.ts`
+
+#### 📱 PWA / 離線模組
+- **PWA 配置：** `next.config.js`
+- **Service Worker：** `public/sw.js`
+- **Manifest：** `public/manifest.json`
+- **離線橫幅：** `components/features/offline/offline-banner.tsx`
+- **IndexedDB：** `lib/idb.ts`
+
+#### ⚙️ 設定與偏好模組
+- **設定頁面：** `app/(dashboard)/settings/page.tsx`
+- **設定面板：** `components/features/settings/settings-panel.tsx`
+- **多語系配置：** `lib/i18n/config.ts`
+- **匯出 API：** `app/api/export/route.ts`
+- **單元測試：** `tests/unit/settingsPanel.test.tsx`, `tests/unit/exportRoute.test.ts`
+- **E2E 測試：** `tests/e2e/settings.spec.ts`
+
+#### 🔌 外部 API / 整合模組
+- **內部 API Routes：** `app/api/workouts/route.ts`, `app/api/exercises/route.ts`, `app/api/export/route.ts`
+
+#### 🔒 監控與安全模組
+- **RLS 啟用遷移：** `supabase/migrations/20250102_enable_rls.sql`
+- **RLS 策略遷移：** `supabase/migrations/20250102_rls_policies.sql`
+- **RLS 回滾腳本：** `supabase/migrations/20250102_rollback_rls.sql`
+- **安全文件：** `docs/security.md`
+- **環境變數測試：** `tests/unit/supabaseEnv.test.ts`
+
+#### 🚀 部署 / DevOps 模組
+- **專案配置：** `next.config.js`, `package.json`
+- **測試配置：** `jest.config.cjs`, `playwright.config.ts`
+- **測試設定：** `tests/setupTests.ts`
+- **單元測試：** `tests/unit/` (13 個測試檔)
+- **E2E 測試：** `tests/e2e/` (6 個測試檔)
+- **其他配置：** `eslint.config.mjs`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.js`
 
 ## Auth 模組
 ### 目標與產出
