@@ -103,12 +103,12 @@
 
 ### 預期 API / Schema 介面
 - Supabase Auth 內建 `auth.users` 表維護基礎身份資料。
-- `public.user_profiles` 表（`id`, `display_name`, `avatar_url`, `unit_preference`, `created_at`）。
+- `public.profiles` 表（`id`, `email`, `full_name`, `avatar_url`, `locale`, `theme`, `unit_preference`, `created_at`, `updated_at`）。
 - REST 端點：`POST /api/auth/sign-in`、`POST /api/auth/sign-up`、`POST /api/auth/reset`（封裝 Supabase Auth）。
 
 ### 前/後端資產
 - 前端：登入/註冊頁、第三方登入按鈕、錯誤狀態提示、登入後導引。
-- 後端：OAuth provider 設定、自訂 email 範本、Edge Function 觸發器同步 `user_profiles`。
+- 後端：OAuth provider 設定、自訂 email 範本、Edge Function 觸發器同步 `profiles`。
 
 ### 驗收指標
 - 主要身分流程成功率 > 99%。
@@ -133,7 +133,7 @@
 ### 預期 API / Schema 介面
 - 表格：`exercises`（`id`, `user_id`, `name`, `muscle_group`, `is_custom`, `created_at`）。
 - 表格：`workouts`（`id`, `user_id`, `performed_at`, `notes`）。
-- 表格：`workout_sets`（`id`, `workout_id`, `exercise_id`, `set_index`, `weight`, `reps`, `rpe`, `remarks`）。
+- 表格：`workout_entries`（`id`, `workout_id`, `exercise_id`, `position`, `sets`, `reps`, `weight`, `unit`, `notes`, `created_at`, `updated_at`）。
 - REST 端點：`GET/POST /api/exercises`、`GET/POST /api/workouts`、`PATCH/DELETE /api/workouts/:id`。
 
 ### 前/後端資產
@@ -224,12 +224,12 @@
 - Could：多語系（zh-TW/en）、個人化儀表板偏好。
 
 ### 跨模組相依與邊界
-- 與 `Auth` 共用 `user_profiles` 資料表與驗證。
+- 與 `Auth` 共用 `profiles` 資料表與驗證，偏好設定欄位（如 `theme`, `unit_preference`, `locale`）直接儲存在此表。
 - 與 `PWA/離線` 共用本地偏好快取與同步策略。
 - 向 `外部 API/整合` 暴露偏好讀取端點以利行動 App 對齊。
 
 ### 預期 API / Schema 介面
-- 表格：`user_preferences`（`user_id`, `theme`, `unit`, `language`, `notifications`, `updated_at`）。
+- 表格：`profiles`（`id`, `email`, `full_name`, `avatar_url`, `locale`, `theme`, `unit_preference`, `created_at`, `updated_at`）。
 - REST 端點：`GET/PUT /api/me/preferences`、`PATCH /api/me/profile`。
 
 ### 前/後端資產
