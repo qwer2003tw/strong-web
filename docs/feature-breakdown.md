@@ -8,7 +8,7 @@
 | --- | :---: | --- | --- |
 | 🔐 Auth 模組 | 🚧 | ✅ Email/Password 登入<br>✅ OAuth (GitHub, Google)<br>✅ 密碼重設流程（含雙語介面）<br>✅ Session 管理與頁面保護 | ⏳ Apple OAuth |
 | 💪 Workout / Exercise CRUD | 🚧 | ✅ 訓練列表與 CRUD<br>✅ 動作庫管理<br>✅ 詳情頁編輯<br>✅ IndexedDB 快取<br>✅ API routes 整合 | ⏳ Routine/Plan 功能<br>⏳ 自動套用模板<br>⏳ 第三方匯入 |
-| 📊 歷史與統計模組 | 🚧 | ✅ 歷史列表<br>✅ 7/30 日訓練趨勢<br>✅ Recharts 圖表<br>✅ 範圍切換<br>✅ IndexedDB 快取 | ⏳ 離線衝突解決<br>⏳ 1RM 估算<br>⏳ 進階分析 API<br>⏳ 報表匯出 |
+| 📊 歷史與統計模組 | 🚧 | ✅ 歷史列表<br>✅ 7/30 日訓練趨勢<br>✅ Recharts 圖表<br>✅ 範圍切換<br>✅ IndexedDB 快取 | ⏳ 離線衝突解決<br>⏳ 1RM 估算<br>⏳ 進階分析 API（TODO：擴充 `/api/history` 提供 volume/1RM 統計）<br>⏳ 報表匯出 |
 | 📱 PWA / 離線模組 | 🚧 | ✅ PWA 配置 (next-pwa)<br>✅ Service Worker<br>✅ Manifest<br>✅ 離線橫幅<br>✅ IndexedDB 快取 | ⏳ 背景同步<br>⏳ 離線衝突處理<br>⏳ 通知策略 |
 | ⚙️ 設定與偏好模組 | 🚧 | ✅ 單位切換 (kg/lb)<br>✅ 主題切換<br>✅ 個人資料編輯<br>✅ 多語系 (zh-TW/en)<br>✅ 訓練資料匯出 | ⏳ 通知偏好<br>⏳ 可及性最佳化 (WCAG 2.1 AA) |
 | 🔌 外部 API / 整合模組 | ❌ | ✅ 內部 API routes (基礎) | ⏳ 公開 REST API<br>⏳ GraphQL 端點<br>⏳ 匯入 webhook |
@@ -49,7 +49,8 @@
 - **趨勢圖表：** `components/features/history/history-trend-chart.tsx`
 - **歷史頁面：** `app/(dashboard)/history/page.tsx`
 - **歷史工具函式：** `lib/history.ts`
-- **API Routes：** `app/api/history/route.ts`, `app/api/analytics/volume/route.ts`
+- **API Routes：** `app/api/history/route.ts`
+- **TODO：進階統計端點：** `app/api/analytics/volume/route.ts`（預計改寫為 `/api/history` 子路由提供 volume/1RM 相關資料）
 - **單元測試：** `tests/unit/historyDashboard.test.tsx`, `tests/unit/historyAnalytics.test.ts`, `tests/unit/historyRouteHandlers.test.ts`
 - **E2E 測試：** `tests/e2e/history.spec.ts`
 
@@ -162,7 +163,8 @@
 
 ### 預期 API / Schema 介面
 - 視圖：`v_user_training_volume`（`user_id`, `exercise_id`, `total_volume`, `period`）。
-- REST 端點：`GET /api/history?range=7d|30d`、`GET /api/analytics/volume`、`GET /api/analytics/one-rep-max`。
+- REST 端點：`GET /api/history?range=7d|30d`（已提供歷史趨勢與總量資料）。
+- TODO：`GET /api/analytics/volume`、`GET /api/analytics/one-rep-max`（預計獨立為 `/api/history/volume`、`/api/history/one-rep-max` 以提供進階分析）。
 
 ### 前/後端資產
 - 前端：歷史列表頁、圖表元件、篩選器、差異提示 UI。
@@ -242,8 +244,8 @@
 - 消費 `Workout/Exercise CRUD`、`歷史與統計` 的資料結構。
 - 與 `監控與安全` 協作以建立 Rate Limit、審計與 API 金鑰管理。
 
-### 預期 API / Schema 介面
-- REST：`GET /api/v1/workouts`, `POST /api/v1/import`, `GET /api/v1/analytics`。
+- REST：`GET /api/v1/workouts`, `POST /api/v1/import`, `GET /api/v1/history`。
+- TODO：`GET /api/v1/analytics`（待 `進階分析 API` 完成後改綁 `/api/history` 擴充版端點）。
 - GraphQL schema：`type Workout`, `type Exercise`, `type TrainingVolume`, `query workouts`, `mutation syncWorkout`。
 - Webhook：`POST /webhooks/health-sync` 處理第三方匯入。
 
