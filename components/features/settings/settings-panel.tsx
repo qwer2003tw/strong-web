@@ -65,8 +65,12 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
       return;
     }
 
+    // Get user email from auth
+    const { data: { user } } = await supabase.auth.getUser();
+
     const { error: upsertError } = await supabase.from("profiles").upsert({
       id: userId,
+      email: user?.email ?? null,
       full_name: name || null,
       locale,
       unit_preference: unit,

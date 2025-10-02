@@ -41,8 +41,24 @@ export default async function RootLayout({
     console.error('Failed to fetch Supabase session', error);
   }
 
-  const preferredLocale =
-    (session?.user?.user_metadata?.locale as Locale | undefined) ?? defaultLocale;
+  // Read locale from profiles table instead of user_metadata
+  let preferredLocale = defaultLocale;
+  if (session?.user?.id) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('locale')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile?.locale) {
+        preferredLocale = profile.locale as Locale;
+      }
+    } catch (error) {
+      console.error('Failed to fetch user profile', error);
+    }
+  }
+
   const messages = await getMessages(preferredLocale);
 
   return (
