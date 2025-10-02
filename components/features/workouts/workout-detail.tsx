@@ -325,6 +325,7 @@ export function WorkoutDetail({ workout, exercises }: WorkoutDetailProps) {
             entries.map((entry) => (
               <div
                 key={entry.id}
+                data-testid="workout-entry"
                 className="flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between"
               >
                 <div>
