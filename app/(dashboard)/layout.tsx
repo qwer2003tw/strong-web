@@ -6,15 +6,11 @@ import { OfflineBanner } from "@/components/features/offline/offline-banner";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createServerSupabaseClient();
-  let session = null;
-  try {
-    const result = await supabase.auth.getSession();
-    session = result.data.session;
-  } catch (error) {
-    console.error('Failed to fetch Supabase session', error);
-  }
 
-  if (!session) {
+  // Use getUser() to verify the user's identity with Supabase Auth server
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (!user || authError) {
     if (process.env.E2E_BYPASS_AUTH === "true") {
       // Allow dashboard pages to render without redirect during end-to-end tests.
     } else {
@@ -24,12 +20,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   // Fetch user profile for display name
   let profile = null;
-  if (session?.user?.id) {
+  if (user?.id) {
     try {
       const { data } = await supabase
         .from('profiles')
         .select('full_name, email')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
       profile = data;
     } catch (error) {
@@ -38,7 +34,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   const userName = profile?.full_name || null;
-  const userEmail = profile?.email || session?.user?.email || null;
+  const userEmail = profile?.email || user?.email || null;
 
   return (
     <div className="min-h-screen bg-background">

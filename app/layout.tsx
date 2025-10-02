@@ -35,8 +35,14 @@ export default async function RootLayout({
   let session: Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session'] | null = null;
 
   try {
-    const result = await supabase.auth.getSession();
-    session = result.data.session;
+    // Use getUser() to verify the user's identity with Supabase Auth server
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    // Only get session if user is authenticated
+    if (user && !authError) {
+      const { data: { session: verifiedSession } } = await supabase.auth.getSession();
+      session = verifiedSession;
+    }
   } catch (error) {
     console.error('Failed to fetch Supabase session', error);
   }
