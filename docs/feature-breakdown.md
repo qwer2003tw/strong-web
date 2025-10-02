@@ -42,7 +42,8 @@
 - **單元測試：** `tests/unit/workoutsDashboard.test.tsx`, `tests/unit/workoutDetail.test.tsx`, `tests/unit/workoutsApi.test.ts`, `tests/unit/exerciseLibrary.test.tsx`, `tests/unit/exercisesRoute.test.ts`
 - **E2E 測試：** `tests/e2e/workouts.spec.ts`, `tests/e2e/exercises.spec.ts`
 
-#### 📊 歷史與統計模組
+#### <a id="history-stats-module"></a>📊 歷史與統計模組
+- **進度現況：** 已完成 7/30 日訓練量趨勢圖表與快取；1RM 估算與相關分析 API 仍為待辦。
 - **歷史儀表板：** `components/features/history/history-dashboard.tsx`
 - **歷史列表：** `components/features/history/history-list.tsx`
 - **歷史篩選器：** `components/features/history/history-filters.tsx`
