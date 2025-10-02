@@ -1,8 +1,16 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import type { Session } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database.types";
+import { createMockSupabaseClient } from "@/lib/mockSupabase";
 
-export type SupabaseSession = Session | null;
+const useMockSupabase =
+  typeof process !== "undefined" &&
+  (process.env.NEXT_PUBLIC_USE_MOCK_SUPABASE === "true" ||
+    process.env.USE_MOCK_SUPABASE === "true");
 
-export const createBrowserSupabaseClient = () =>
-  createClientComponentClient<Database>();
+export const createBrowserSupabaseClient = () => {
+  if (useMockSupabase) {
+    return createMockSupabaseClient() as any;
+  }
+
+  return createClientComponentClient<Database>();
+};
