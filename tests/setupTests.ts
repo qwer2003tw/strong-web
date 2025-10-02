@@ -1,4 +1,22 @@
-import "@testing-library/jest-dom";
+if (typeof globalThis.Node === "undefined") {
+  const doc = globalThis.document as
+    | { defaultView?: { Node?: typeof globalThis.Node } }
+    | undefined;
+  const nodeCtor = doc?.defaultView?.Node;
+
+  if (nodeCtor) {
+    globalThis.Node = nodeCtor;
+  } else {
+    class NodePolyfill {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    globalThis.Node = NodePolyfill as any;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("@testing-library/jest-dom");
+
+export {};
 
 if (typeof globalThis.Request === "undefined") {
   class TestRequest {
