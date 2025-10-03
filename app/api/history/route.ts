@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
-import {
-  buildHistoryTrend,
-  getHistoryEntries,
-  type HistoryRange,
-  type HistorySnapshotResponse,
-} from "@/lib/history";
+import { type HistoryRange, type HistorySnapshotResponse } from "@/lib/history";
+import { getCurrentUser } from "@/lib/services/authService";
+import { getHistorySnapshot } from "@/lib/services/historyService";
 
 const DEFAULT_RANGE: HistoryRange = "30d";
 
@@ -18,12 +15,9 @@ function parseRange(value: string | null): HistoryRange {
 
 export async function GET(request: Request) {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -31,8 +25,7 @@ export async function GET(request: Request) {
   const range = parseRange(url.searchParams.get("range"));
 
   try {
-    const entries = await getHistoryEntries(supabase, user.id, range);
-    const trend = buildHistoryTrend(entries, range);
+    const { entries, trend } = await getHistorySnapshot(user.id, range, { client: supabase });
     const payload: HistorySnapshotResponse = {
       data: entries,
       trend,

@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import type { Database } from "@/lib/database.types";
+import type { Database, UnitSystem } from "@/types/db";
 import { validateWorkoutForm } from "@/lib/validation";
 import { readCache, writeCache } from "@/lib/idb";
 import { useSupabaseClient } from "@/components/features/providers/supabase-session-provider";
+import { addWorkoutEntry, removeWorkoutEntry } from "@/lib/services/workoutService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -139,46 +140,37 @@ export function WorkoutDetail({ workout, exercises }: WorkoutDetailProps) {
       return;
     }
 
-    const { data, error: insertError } = await supabase
-      .from("workout_entries")
-      .insert({
-        workout_id: workout.id,
-        exercise_id: payload.exercise_id,
-        sets: payload.sets,
-        reps: payload.reps,
-        weight: payload.weight,
-        unit: payload.unit,
-        notes: payload.notes || null,
-        position: entries.length + 1,
-      })
-      .select("id, workout_id, exercise_id, position, sets, reps, weight, unit, notes, exercises(id, name, muscle_group)")
-      .single();
-
-    if (insertError || !data) {
-      setError(insertError?.message ?? "Unable to add entry");
-      return;
+    try {
+      const entry = await addWorkoutEntry(
+        workout.id,
+        {
+          exercise_id: payload.exercise_id,
+          sets: payload.sets,
+          reps: payload.reps ?? null,
+          weight: payload.weight ?? null,
+          unit: payload.unit ? (payload.unit as UnitSystem) : null,
+          notes: payload.notes || null,
+          position: entries.length + 1,
+        },
+        { client: supabase }
+      );
+      setEntries((previous) => [...previous, entry]);
+      setSuccess("Entry added");
+      router.refresh();
+    } catch (serviceError) {
+      setError(serviceError instanceof Error ? serviceError.message : "Unable to add entry");
     }
-
-    setEntries((previous) => [...previous, data as WorkoutEntryWithExercise]);
-    setSuccess("Entry added");
-    router.refresh();
   }
 
   async function handleEntryDelete(id: string) {
-    const { error: deleteError } = await supabase
-      .from("workout_entries")
-      .delete()
-      .eq("id", id)
-      .eq("workout_id", workout.id);
-
-    if (deleteError) {
-      setError(deleteError.message);
-      return;
+    try {
+      await removeWorkoutEntry(workout.id, id, { client: supabase });
+      setEntries((previous) => previous.filter((entry) => entry.id !== id));
+      setSuccess("Entry removed");
+      router.refresh();
+    } catch (serviceError) {
+      setError(serviceError instanceof Error ? serviceError.message : "Unable to remove entry");
     }
-
-    setEntries((previous) => previous.filter((entry) => entry.id !== id));
-    setSuccess("Entry removed");
-    router.refresh();
   }
 
   return (

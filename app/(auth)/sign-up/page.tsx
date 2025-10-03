@@ -1,17 +1,9 @@
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { SignUpForm } from "@/components/features/auth/sign-up-form";
+import { getCurrentSession } from "@/lib/services/authService";
 
 export default async function SignUpPage() {
-  const supabase = await createServerSupabaseClient();
-  let session = null;
-  try {
-    const result = await supabase.auth.getSession();
-    session = result.data.session;
-  } catch (error) {
-    console.error('Failed to fetch Supabase session', error);
-  }
-
+  const session = await getCurrentSession();
   if (session) {
     redirect("/workouts");
   }

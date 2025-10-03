@@ -2,7 +2,7 @@ import {
   createRouteHandlerClient,
   createServerComponentClient,
 } from "@supabase/auth-helpers-nextjs";
-import type { Database } from "@/lib/database.types";
+import type { Database } from "@/types/db";
 import { cookies } from "next/headers";
 import { createMockSupabaseClient } from "@/lib/mockSupabase";
 
@@ -18,7 +18,7 @@ export const createServerSupabaseClient = async () => {
   if (useMockSupabase) {
     return createMockSupabaseClient() as unknown as ServerSupabaseClient;
   }
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   return createServerComponentClient<Database>({ cookies: () => cookieStore });
 };
 
@@ -26,6 +26,6 @@ export const createSupabaseRouteHandlerClient = async () => {
   if (useMockSupabase) {
     return createMockSupabaseClient() as unknown as ServerSupabaseClient;
   }
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   return createRouteHandlerClient<Database>({ cookies: () => cookieStore });
 };

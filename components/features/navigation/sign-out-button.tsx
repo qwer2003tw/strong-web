@@ -23,10 +23,10 @@ export function SignOutButton({ children }: SignOutButtonProps) {
     throw new Error("SignOutButton expects a single React element child.");
   }
 
+  const element = children as ReactElement<{ onClick?: (event: MouseEvent<HTMLElement>) => void; disabled?: boolean }>;
+
   function handleClick(event: MouseEvent<HTMLElement>) {
-    if (typeof children.props.onClick === "function") {
-      children.props.onClick(event);
-    }
+    element.props.onClick?.(event);
     if (event.defaultPrevented) {
       return;
     }
@@ -38,8 +38,8 @@ export function SignOutButton({ children }: SignOutButtonProps) {
     });
   }
 
-  return cloneElement(children, {
+  return cloneElement(element, {
     onClick: handleClick,
-    disabled: Boolean(children.props.disabled) || pending,
+    disabled: Boolean(element.props.disabled) || pending,
   });
 }

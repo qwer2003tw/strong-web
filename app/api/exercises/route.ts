@@ -1,38 +1,30 @@
 import { NextResponse } from "next/server";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
+import { getCurrentUser } from "@/lib/services/authService";
+import { createExercise, getUserExercises } from "@/lib/services/exerciseService";
 
 export async function GET() {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("exercises")
-    .select("id, name, muscle_group, equipment, notes, updated_at")
-    .eq("user_id", user.id)
-    .order("name", { ascending: true });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const exercises = await getUserExercises(user.id, { client: supabase });
+    return NextResponse.json({ data: exercises });
+  } catch (error) {
+    console.error("Failed to load exercises", error);
+    return NextResponse.json({ error: "Failed to load exercises" }, { status: 500 });
   }
-
-  return NextResponse.json({ data });
 }
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -42,21 +34,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
 
-  const { data, error } = await supabase
-    .from("exercises")
-    .insert({
-      user_id: user.id,
-      name: payload.name,
-      muscle_group: payload.muscle_group ?? null,
-      equipment: payload.equipment ?? null,
-      notes: payload.notes ?? null,
-    })
-    .select("*")
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const exercise = await createExercise(
+      user.id,
+      {
+        name: payload.name,
+        muscle_group: payload.muscle_group ?? null,
+        equipment: payload.equipment ?? null,
+        notes: payload.notes ?? null,
+      },
+      { client: supabase }
+    );
+    return NextResponse.json({ data: exercise }, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create exercise", error);
+    return NextResponse.json({ error: "Failed to create exercise" }, { status: 500 });
   }
-
-  return NextResponse.json({ data }, { status: 201 });
 }

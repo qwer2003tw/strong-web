@@ -1,5 +1,10 @@
+jest.mock("@/lib/supabaseServer", () => ({
+  createServerSupabaseClient: jest.fn(async () => ({})),
+  createSupabaseRouteHandlerClient: jest.fn(async () => ({})),
+}));
+
 if (typeof globalThis.Node === "undefined") {
-  const doc = globalThis.document as
+  const doc = globalThis.document as unknown as
     | { defaultView?: { Node?: typeof globalThis.Node } }
     | undefined;
   const nodeCtor = doc?.defaultView?.Node;

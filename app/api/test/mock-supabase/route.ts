@@ -30,12 +30,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ data: getMockSupabaseStore() });
     }
 
-    const supabase = createMockSupabaseClient();
+    const supabase = createMockSupabaseClient() as unknown as { from: (table: string) => any };
 
     if (body.action === "insertEntry") {
       const result = await supabase
         .from("workout_entries")
-        .insert(body.entry as Parameters<ReturnType<ReturnType<typeof createMockSupabaseClient>["from"]>["insert"]>[0])
+        .insert(body.entry as any)
         .select("*")
         .single();
       return NextResponse.json(result);

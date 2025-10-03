@@ -1,4 +1,4 @@
-import type { UnitSystem } from "@/lib/database.types";
+import type { UnitSystem } from "@/types/db";
 
 export type HistoryRange = "7d" | "30d";
 
@@ -62,19 +62,11 @@ function rangeStart(range: HistoryRange, options?: HistoryOptions) {
   return start;
 }
 
-export function calculateEntryVolume(
-  sets: number | null,
-  reps: number | null,
-  weight: number | null
-) {
+export function calculateEntryVolume(sets: number | null, reps: number | null, weight: number | null) {
   const resolvedSets = Number(sets ?? 0);
   const resolvedReps = Number(reps ?? 0);
   const resolvedWeight = Number(weight ?? 0);
-  if (
-    !Number.isFinite(resolvedSets) ||
-    !Number.isFinite(resolvedReps) ||
-    !Number.isFinite(resolvedWeight)
-  ) {
+  if (!Number.isFinite(resolvedSets) || !Number.isFinite(resolvedReps) || !Number.isFinite(resolvedWeight)) {
     return 0;
   }
   if (!resolvedSets || !resolvedReps || !resolvedWeight) {
@@ -117,10 +109,7 @@ export function buildHistoryTrend(
   return trend;
 }
 
-export function buildVolumeSummary(
-  entries: HistoryEntry[],
-  options?: HistoryOptions
-): VolumeSummary[] {
+export function buildVolumeSummary(entries: HistoryEntry[], options?: HistoryOptions): VolumeSummary[] {
   const reference = startOfDay(getReferenceDate(options));
   const start7 = rangeStart("7d", { referenceDate: reference });
   const start30 = rangeStart("30d", { referenceDate: reference });
@@ -142,139 +131,6 @@ export function buildVolumeSummary(
     { period: "7d", totalVolume: total7 },
     { period: "30d", totalVolume: total30 },
   ];
-}
-
-interface SupabaseQueryResult<T> {
-  data: T[] | null;
-  error: { message: string } | null;
-}
-
-interface SupabaseQueryBuilder<T> {
-  select(selection: string): SupabaseQueryBuilder<T>;
-  eq(column: string, value: unknown): SupabaseQueryBuilder<T>;
-  gte(column: string, value: unknown): SupabaseQueryBuilder<T>;
-  order(column: string, config: { ascending: boolean }): SupabaseQueryBuilder<T>;
-  limit(count: number): Promise<SupabaseQueryResult<T>>;
-}
-
-type SupabaseClient = {
-  from<T>(table: string): SupabaseQueryBuilder<T>;
-};
-
-interface HistoryQueryRow {
-  id: string;
-  workout_id: string | null;
-  exercise_id: string | null;
-  sets: number | null;
-  reps: number | null;
-  weight: number | null;
-  unit: UnitSystem | null;
-  created_at: string | null;
-  workout?: {
-    id?: string | null;
-    user_id?: string | null;
-    scheduled_for?: string | null;
-  } | null;
-  exercise?: {
-    id?: string | null;
-    name?: string | null;
-    muscle_group?: string | null;
-  } | null;
-}
-
-interface VolumeViewRow {
-  period: string | null;
-  total_volume: number | null;
-  user_id?: string | null;
-}
-
-export async function getHistoryEntries(
-  supabase: SupabaseClient,
-  userId: string,
-  range: HistoryRange
-): Promise<HistoryEntry[]> {
-  const since = rangeStart(range).toISOString();
-  const { data, error } = await supabase
-    .from<HistoryQueryRow>("workout_entries")
-    .select(
-      `
-        id,
-        workout_id,
-        exercise_id,
-        sets,
-        reps,
-        weight,
-        unit,
-        created_at,
-        workout:workouts!inner(
-          id,
-          user_id,
-          scheduled_for
-        ),
-        exercise:exercises(
-          id,
-          name,
-          muscle_group
-        )
-      `
-    )
-    .eq("workouts.user_id", userId)
-    .gte("created_at", since)
-    .order("created_at", { ascending: false })
-    .limit(500);
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const now = new Date();
-  return (data as HistoryQueryRow[] | null | undefined)?.map((row) => {
-    const performed = row.workout?.scheduled_for ?? row.created_at ?? now.toISOString();
-    const volume = calculateEntryVolume(row.sets, row.reps, row.weight);
-    return {
-      id: row.id,
-      workoutId: row.workout_id ?? row.workout?.id ?? null,
-      exerciseId: row.exercise_id ?? row.exercise?.id ?? null,
-      exerciseName: row.exercise?.name ?? "Unknown exercise",
-      muscleGroup: row.exercise?.muscle_group ?? null,
-      performedAt: performed,
-      sets: row.sets ?? 0,
-      reps: row.reps ?? null,
-      weight: row.weight ?? null,
-      totalVolume: volume,
-      unit: row.unit ?? null,
-    } satisfies HistoryEntry;
-  }) ?? [];
-}
-
-export async function getVolumeAnalytics(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<VolumeSummary[]> {
-  try {
-    const { data, error } = await supabase
-      .from<VolumeViewRow>("v_user_training_volume")
-      .select("period,total_volume")
-      .eq("user_id", userId)
-      .limit(500);
-
-    if (!error && data?.length) {
-      const totals: Record<HistoryRange, number> = { "7d": 0, "30d": 0 };
-      for (const row of data as { period?: string | null; total_volume?: number | null }[]) {
-        const period = row.period === "7d" || row.period === "30d" ? row.period : null;
-        if (!period) continue;
-        totals[period] += row.total_volume ? Number(row.total_volume) : 0;
-      }
-      return [
-        { period: "7d", totalVolume: totals["7d"] },
-        { period: "30d", totalVolume: totals["30d"] },
-      ];
-    }
-  } catch (error) {
-    console.warn("Failed to resolve training volume view", error);
-  }
-
-  const fallbackEntries = await getHistoryEntries(supabase, userId, "30d");
-  return buildVolumeSummary(fallbackEntries);
 }
 
 export interface HistorySnapshotResponse {

@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
-import type { Database, ThemePreference, UnitSystem } from "@/lib/database.types";
+import type { Database, ThemePreference, UnitSystem } from "@/types/db";
 import { useSupabaseClient } from "@/components/features/providers/supabase-session-provider";
+import { upsertUserProfile } from "@/lib/services/authService";
 import { useTheme } from "@/components/features/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,22 +69,24 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
     // Get user email from auth
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { error: upsertError } = await supabase.from("profiles").upsert({
-      id: userId,
-      email: user?.email ?? null,
-      full_name: name || null,
-      locale,
-      unit_preference: unit,
-      theme,
-    });
-
-    if (upsertError) {
-      console.error("Profile save failed", upsertError);
-      setError(upsertError.message);
+    try {
+      await upsertUserProfile(
+        userId,
+        {
+          email: user?.email ?? null,
+          full_name: name || null,
+          locale,
+          unit_preference: unit,
+          theme,
+        },
+        { client: supabase }
+      );
+      setMessage("Settings updated");
+    } catch (serviceError) {
+      console.error("Profile save failed", serviceError);
+      setError(serviceError instanceof Error ? serviceError.message : "Unable to save profile");
       return;
     }
-
-    setMessage("Settings updated");
     if (typeof document !== "undefined") {
       document.body.dataset.settingsToast = "Settings updated";
     }

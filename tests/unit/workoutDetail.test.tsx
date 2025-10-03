@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WorkoutDetail, type WorkoutEntryWithExercise } from "@/components/features/workouts/workout-detail";
-import type { Database } from "@/lib/database.types";
+import type { Database } from "@/types/db";
 import { readCache, writeCache } from "@/lib/idb";
 
 jest.mock("@/lib/idb", () => ({

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/features/providers/app-providers";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { defaultLocale, getMessages } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
+import { getCurrentSession, getUserProfile } from "@/lib/services/authService";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,37 +31,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createServerSupabaseClient();
-  let session: Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session'] | null = null;
+  const session = await getCurrentSession();
+  let preferredLocale: Locale = defaultLocale;
 
-  try {
-    // Use getUser() to verify the user's identity with Supabase Auth server
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    // Only get session if user is authenticated
-    if (user && !authError) {
-      const { data: { session: verifiedSession } } = await supabase.auth.getSession();
-      session = verifiedSession;
-    }
-  } catch (error) {
-    console.error('Failed to fetch Supabase session', error);
-  }
-
-  // Read locale from profiles table instead of user_metadata
-  let preferredLocale = defaultLocale;
   if (session?.user?.id) {
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('locale')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profile?.locale) {
-        preferredLocale = profile.locale as Locale;
-      }
-    } catch (error) {
-      console.error('Failed to fetch user profile', error);
+    const profile = await getUserProfile(session.user.id);
+    if (profile?.locale) {
+      preferredLocale = profile.locale as Locale;
     }
   }
 

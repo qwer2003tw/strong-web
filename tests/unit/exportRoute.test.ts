@@ -2,12 +2,21 @@
 
 import { GET } from "@/app/api/export/route";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
+import { getCurrentUser } from "@/lib/services/authService";
+import { exportUserExercises } from "@/lib/services/exerciseService";
+import { exportUserWorkouts } from "@/lib/services/workoutService";
 
 jest.mock("@/lib/supabaseServer");
+jest.mock("@/lib/services/authService");
+jest.mock("@/lib/services/exerciseService");
+jest.mock("@/lib/services/workoutService");
 
 const createSupabaseRouteHandlerClientMock = createSupabaseRouteHandlerClient as jest.MockedFunction<
   typeof createSupabaseRouteHandlerClient
 >;
+const getCurrentUserMock = getCurrentUser as jest.MockedFunction<typeof getCurrentUser>;
+const exportUserExercisesMock = exportUserExercises as jest.MockedFunction<typeof exportUserExercises>;
+const exportUserWorkoutsMock = exportUserWorkouts as jest.MockedFunction<typeof exportUserWorkouts>;
 
 describe("GET /api/export", () => {
   beforeEach(() => {
@@ -15,14 +24,10 @@ describe("GET /api/export", () => {
   });
 
   it("returns unauthorized when user is missing", async () => {
-    const authGetUser = jest.fn().mockResolvedValue({
-      data: { user: null },
-      error: { message: "No session" },
-    });
+    const client = {} as any;
 
-    createSupabaseRouteHandlerClientMock.mockResolvedValue({
-      auth: { getUser: authGetUser },
-    } as any);
+    createSupabaseRouteHandlerClientMock.mockResolvedValue(client);
+    getCurrentUserMock.mockResolvedValue(null);
 
     const response = await GET();
     expect(response.status).toBe(401);
@@ -34,37 +39,24 @@ describe("GET /api/export", () => {
     jest.useFakeTimers();
     jest.setSystemTime(now);
 
+    const client = { supabase: true } as any;
     const workoutsData = [{ id: "w1", title: "Workout", workout_entries: [] }];
     const exercisesData = [{ id: "e1", name: "Squat" }];
 
-    const workoutsEq = jest.fn().mockResolvedValue({ data: workoutsData, error: null });
-    const exercisesEq = jest.fn().mockResolvedValue({ data: exercisesData, error: null });
-
-    const select = jest.fn().mockImplementation((query: string) => {
-      if (query.includes("workout_entries")) {
-        return { eq: workoutsEq };
-      }
-      return { eq: exercisesEq };
-    });
-
-    const from = jest.fn().mockImplementation(() => {
-      return { select };
-    });
-
-    createSupabaseRouteHandlerClientMock.mockResolvedValue({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-123" } }, error: null }) },
-      from,
-    } as any);
+    createSupabaseRouteHandlerClientMock.mockResolvedValue(client);
+    getCurrentUserMock.mockResolvedValue({ id: "user-123" } as any);
+    exportUserWorkoutsMock.mockResolvedValue(workoutsData as any);
+    exportUserExercisesMock.mockResolvedValue(exercisesData as any);
 
     try {
       const response = await GET();
       const payload = await response.json();
 
       expect(response.status).toBe(200);
-      expect(from).toHaveBeenCalledWith("workouts");
-      expect(from).toHaveBeenCalledWith("exercises");
-      expect(workoutsEq).toHaveBeenCalledWith("user_id", "user-123");
-      expect(exercisesEq).toHaveBeenCalledWith("user_id", "user-123");
+      expect(createSupabaseRouteHandlerClientMock).toHaveBeenCalled();
+      expect(getCurrentUserMock).toHaveBeenCalledWith({ client });
+      expect(exportUserWorkoutsMock).toHaveBeenCalledWith("user-123", { client });
+      expect(exportUserExercisesMock).toHaveBeenCalledWith("user-123", { client });
       expect(payload).toEqual({
         exportedAt: now.toISOString(),
         workouts: workoutsData,
@@ -76,18 +68,14 @@ describe("GET /api/export", () => {
   });
 
   it("propagates supabase errors", async () => {
-    const workoutsError = { message: "Failed to load" };
-    const workoutsEq = jest.fn().mockResolvedValue({ data: null, error: workoutsError });
-    const select = jest.fn().mockReturnValue({ eq: workoutsEq });
-    const from = jest.fn().mockReturnValue({ select });
+    const client = {} as any;
 
-    createSupabaseRouteHandlerClientMock.mockResolvedValue({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }) },
-      from,
-    } as any);
+    createSupabaseRouteHandlerClientMock.mockResolvedValue(client);
+    getCurrentUserMock.mockResolvedValue({ id: "user-1" } as any);
+    exportUserWorkoutsMock.mockRejectedValue(new Error("Failed to export workouts"));
 
     const response = await GET();
     expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({ error: "Failed to load" });
+    await expect(response.json()).resolves.toEqual({ error: "Failed to export workouts" });
   });
 });

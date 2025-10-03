@@ -2,7 +2,7 @@
 
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import type { SupabaseClient, Session } from "@supabase/supabase-js";
-import type { Database } from "@/lib/database.types";
+import type { Database } from "@/types/db";
 import { createContext, useContext, useMemo } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 

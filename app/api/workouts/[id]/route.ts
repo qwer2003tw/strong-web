@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
-import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
 import { validateWorkoutForm } from "@/lib/validation";
+import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
+import { getCurrentUser } from "@/lib/services/authService";
+import {
+  deleteWorkout,
+  getWorkoutDetail,
+  updateWorkout,
+} from "@/lib/services/workoutService";
+import type { WorkoutUpdate } from "@/types/view";
 
 interface Params {
   params: {
@@ -10,39 +17,26 @@ interface Params {
 
 export async function GET(_: Request, { params }: Params) {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("workouts")
-    .select(
-      "id, title, notes, scheduled_for, status, updated_at, created_at, workout_entries(id, exercise_id, position, sets, reps, weight, unit, notes, exercises(id, name, muscle_group))"
-    )
-    .eq("user_id", user.id)
-    .eq("id", params.id)
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const workout = await getWorkoutDetail(user.id, params.id, { client: supabase });
+    return NextResponse.json({ data: workout });
+  } catch (error) {
+    console.error("Failed to load workout", error);
+    return NextResponse.json({ error: "Failed to load workout" }, { status: 500 });
   }
-
-  return NextResponse.json({ data });
 }
 
 export async function PATCH(request: Request, { params }: Params) {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -59,7 +53,7 @@ export async function PATCH(request: Request, { params }: Params) {
     }
   }
 
-  const updatePayload: Record<string, unknown> = {
+  const updatePayload: WorkoutUpdate = {
     updated_at: new Date().toISOString(),
   };
   if (typeof payload.title === "string") {
@@ -75,41 +69,28 @@ export async function PATCH(request: Request, { params }: Params) {
     updatePayload.status = payload.status;
   }
 
-  const { data, error } = await supabase
-    .from("workouts")
-    .update(updatePayload)
-    .eq("user_id", user.id)
-    .eq("id", params.id)
-    .select("*")
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const workout = await updateWorkout(user.id, params.id, updatePayload, { client: supabase });
+    return NextResponse.json({ data: workout });
+  } catch (error) {
+    console.error("Failed to update workout", error);
+    return NextResponse.json({ error: "Failed to update workout" }, { status: 500 });
   }
-
-  return NextResponse.json({ data });
 }
 
 export async function DELETE(_: Request, { params }: Params) {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase
-    .from("workouts")
-    .delete()
-    .eq("user_id", user.id)
-    .eq("id", params.id);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    await deleteWorkout(user.id, params.id, { client: supabase });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete workout", error);
+    return NextResponse.json({ error: "Failed to delete workout" }, { status: 500 });
   }
-
-  return NextResponse.json({ success: true });
 }

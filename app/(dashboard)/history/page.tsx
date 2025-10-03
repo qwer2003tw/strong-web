@@ -1,33 +1,15 @@
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { HistoryDashboard } from "@/components/features/history/history-dashboard";
-import {
-  buildHistoryTrend,
-  getHistoryEntries,
-  getVolumeAnalytics,
-  type HistoryRange,
-} from "@/lib/history";
+import { type HistoryRange } from "@/lib/history";
+import { getCurrentUser } from "@/lib/services/authService";
+import { getHistorySnapshot } from "@/lib/services/historyService";
 
 export const revalidate = 0;
 
 const DEFAULT_RANGE: HistoryRange = "30d";
 
 export default async function HistoryPage() {
-  const supabase = await createServerSupabaseClient();
-  let userId: string | null = null;
-
-  try {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-    if (!error) {
-      userId = user?.id ?? null;
-    }
-  } catch (error) {
-    console.error("Failed to resolve Supabase user", error);
-  }
-
-  if (!userId) {
+  const user = await getCurrentUser();
+  if (!user) {
     return (
       <HistoryDashboard
         initialHistory={[]}
@@ -40,12 +22,7 @@ export default async function HistoryPage() {
   }
 
   try {
-    const [entries, summary] = await Promise.all([
-      getHistoryEntries(supabase, userId, DEFAULT_RANGE),
-      getVolumeAnalytics(supabase, userId),
-    ]);
-    const trend = buildHistoryTrend(entries, DEFAULT_RANGE);
-
+    const { entries, trend, summary } = await getHistorySnapshot(user.id, DEFAULT_RANGE);
     return (
       <HistoryDashboard
         initialHistory={entries}

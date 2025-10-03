@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
-import type { Database } from "@/lib/database.types";
+import type { ExerciseSummaryView } from "@/types/view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 
-type Exercise = Database["public"]["Tables"]["exercises"]["Row"];
+type Exercise = ExerciseSummaryView;
 
 interface ExerciseLibraryProps {
   initialExercises: Exercise[];

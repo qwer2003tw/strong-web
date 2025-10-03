@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
-import { getVolumeAnalytics } from "@/lib/history";
+import { getCurrentUser } from "@/lib/services/authService";
+import { getVolumeSummary } from "@/lib/services/historyService";
 
 export async function GET() {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const data = await getVolumeAnalytics(supabase, user.id);
+    const data = await getVolumeSummary(user.id, { client: supabase });
     return NextResponse.json({ data, lastSyncedAt: new Date().toISOString() });
   } catch (error) {
     console.error("Failed to load analytics summary", error);

@@ -36,7 +36,7 @@ async function setMockResult(
 ) {
   await page.evaluate(
     ([mockKey, mockResult]) => {
-      (window as unknown as { __supabaseMockState: SupabaseMockState }).__supabaseMockState[mockKey] = mockResult;
+      (window as unknown as { __supabaseMockState: Record<string, unknown> }).__supabaseMockState[mockKey] = mockResult as unknown;
     },
     [key, result] as const,
   );

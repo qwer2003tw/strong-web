@@ -1,40 +1,31 @@
 import { NextResponse } from "next/server";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
+import { getCurrentUser } from "@/lib/services/authService";
+import { exportUserExercises } from "@/lib/services/exerciseService";
+import { exportUserWorkouts } from "@/lib/services/workoutService";
 
 export async function GET() {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [workoutsResponse, exercisesResponse] = await Promise.all([
-    supabase
-      .from("workouts")
-      .select(
-        "id, title, status, notes, scheduled_for, created_at, updated_at, workout_entries(id, exercise_id, position, sets, reps, weight, unit, notes))"
-      )
-      .eq("user_id", user.id),
-    supabase
-      .from("exercises")
-      .select("id, name, muscle_group, equipment, notes, created_at, updated_at")
-      .eq("user_id", user.id),
-  ]);
+  try {
+    const [workouts, exercises] = await Promise.all([
+      exportUserWorkouts(user.id, { client: supabase }),
+      exportUserExercises(user.id, { client: supabase }),
+    ]);
 
-  if (workoutsResponse.error || exercisesResponse.error) {
-    return NextResponse.json(
-      { error: workoutsResponse.error?.message ?? exercisesResponse.error?.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      exportedAt: new Date().toISOString(),
+      workouts,
+      exercises,
+    });
+  } catch (error) {
+    console.error("Failed to export data", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  return NextResponse.json({
-    exportedAt: new Date().toISOString(),
-    workouts: workoutsResponse.data,
-    exercises: exercisesResponse.data,
-  });
 }

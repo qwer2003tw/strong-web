@@ -1,4 +1,4 @@
-import type { Database } from "@/lib/database.types";
+import type { Database } from "@/types/db";
 
 export type WorkoutRow = Database["public"]["Tables"]["workouts"]["Row"];
 export type WorkoutInsert = Database["public"]["Tables"]["workouts"]["Insert"];

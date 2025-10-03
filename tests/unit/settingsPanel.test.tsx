@@ -1,10 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SettingsPanel } from "@/components/features/settings/settings-panel";
-import type { ThemePreference } from "@/lib/database.types";
+import type { ThemePreference } from "@/types/db";
+import { upsertUserProfile } from "@/lib/services/authService";
 
 type SupabaseMock = {
-  from: jest.Mock;
+  auth: {
+    getUser: jest.Mock;
+  };
 };
 
 jest.mock("next-intl", () => ({
@@ -21,6 +24,10 @@ jest.mock("@/components/features/providers/supabase-session-provider", () => ({
   useSupabaseClient: () => supabaseClientMock,
 }));
 
+jest.mock("@/lib/services/authService", () => ({
+  upsertUserProfile: jest.fn(),
+}));
+
 let themeValue: ThemePreference = "system";
 const setThemeMock = jest.fn();
 jest.mock("@/components/features/providers/theme-provider", () => ({
@@ -33,17 +40,19 @@ describe("SettingsPanel", () => {
   const originalRevokeObjectURL = URL.revokeObjectURL;
   const realCreateElement = document.createElement.bind(document);
 
-  let upsertMock: jest.Mock;
   let createElementSpy: jest.SpyInstance;
+  const upsertUserProfileMock = upsertUserProfile as jest.MockedFunction<typeof upsertUserProfile>;
 
   beforeEach(() => {
-    upsertMock = jest.fn();
     supabaseClientMock = {
-      from: jest.fn().mockReturnValue({ upsert: upsertMock }),
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: { email: "user@example.com" } }, error: null }),
+      },
     } as unknown as SupabaseMock;
     refreshMock.mockReset();
     setThemeMock.mockReset();
     themeValue = "system";
+    upsertUserProfileMock.mockReset();
     window.localStorage.clear();
     (global as typeof globalThis).fetch = originalFetch;
     URL.createObjectURL = originalCreateObjectURL;
@@ -80,7 +89,7 @@ describe("SettingsPanel", () => {
   }
 
   it("saves profile changes successfully", async () => {
-    upsertMock.mockResolvedValue({ error: null });
+    upsertUserProfileMock.mockResolvedValue({ id: "user-123" } as any);
     renderPanel();
 
     const user = userEvent.setup();
@@ -94,30 +103,33 @@ describe("SettingsPanel", () => {
       expect(refreshMock).toHaveBeenCalled();
     });
 
-    expect(supabaseClientMock.from).toHaveBeenCalledWith("profiles");
-    expect(upsertMock).toHaveBeenCalledWith({
-      id: "user-123",
-      full_name: "Existing User",
-      locale: "en",
-      unit_preference: "metric",
-      theme: "system",
-    });
+    expect(upsertUserProfileMock).toHaveBeenCalledWith(
+      "user-123",
+      {
+        email: "user@example.com",
+        full_name: "Existing User",
+        locale: "en",
+        unit_preference: "metric",
+        theme: "system",
+      },
+      { client: supabaseClientMock }
+    );
   });
 
   it("shows an error when saving fails", async () => {
-    upsertMock.mockResolvedValue({ error: { message: "Unable to save" } });
+    upsertUserProfileMock.mockRejectedValue(new Error("Failed to update profile"));
     renderPanel();
 
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /save settings/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("Unable to save")).toBeInTheDocument();
+      expect(screen.getByText("Failed to update profile")).toBeInTheDocument();
     });
   });
 
   it("updates theme and unit selections", async () => {
-    upsertMock.mockResolvedValue({ error: null });
+    upsertUserProfileMock.mockResolvedValue({ id: "user-123" } as any);
     renderPanel();
 
     const unitSelect = screen.getByLabelText("settings.unit") as HTMLSelectElement;
@@ -143,23 +155,9 @@ describe("SettingsPanel", () => {
     URL.createObjectURL = urlMock as any;
     URL.revokeObjectURL = revokeMock as any;
 
-    const anchor = {
-      click: jest.fn(),
-      set href(value: string) {
-        this._href = value;
-      },
-      get href() {
-        return this._href;
-      },
-      set download(value: string) {
-        this._download = value;
-      },
-      get download() {
-        return this._download;
-      },
-      _href: "",
-      _download: "",
-    } as unknown as HTMLAnchorElement;
+    const anchor = document.createElement("a");
+    const clickMock = jest.fn();
+    anchor.click = clickMock;
 
     createElementSpy.mockImplementation(((tagName: string) => {
       if (tagName === "a") {
@@ -177,7 +175,7 @@ describe("SettingsPanel", () => {
       expect(fetchMock).toHaveBeenCalledWith("/api/export");
     });
 
-    expect(anchor.click).toHaveBeenCalled();
+    expect(clickMock).toHaveBeenCalled();
     expect(anchor.href).toBe("blob:mock");
     expect(anchor.download).toMatch(/^strong-web-export-/);
     expect(urlMock).toHaveBeenCalled();

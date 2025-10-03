@@ -1,16 +1,13 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { DashboardNav } from "@/components/features/navigation/dashboard-nav";
 import { OfflineBanner } from "@/components/features/offline/offline-banner";
+import { getCurrentUser, getUserProfile } from "@/lib/services/authService";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const supabase = await createServerSupabaseClient();
+  const user = await getCurrentUser();
 
-  // Use getUser() to verify the user's identity with Supabase Auth server
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (!user || authError) {
+  if (!user) {
     if (process.env.E2E_BYPASS_AUTH === "true") {
       // Allow dashboard pages to render without redirect during end-to-end tests.
     } else {
@@ -18,19 +15,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     }
   }
 
-  // Fetch user profile for display name
-  let profile = null;
+  let profile: Awaited<ReturnType<typeof getUserProfile>> | null = null;
   if (user?.id) {
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, email')
-        .eq('id', user.id)
-        .single();
-      profile = data;
-    } catch (error) {
-      console.error('Failed to fetch user profile', error);
-    }
+    profile = await getUserProfile(user.id);
   }
 
   const userName = profile?.full_name || null;

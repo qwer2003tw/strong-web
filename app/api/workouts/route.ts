@@ -1,44 +1,36 @@
 import { NextResponse } from "next/server";
-import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
 import { validateWorkoutForm } from "@/lib/validation";
-import type { Database } from "@/lib/database.types";
+import { createSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
+import { getCurrentUser } from "@/lib/services/authService";
+import { createWorkout, getUserWorkouts } from "@/lib/services/workoutService";
+import type { WorkoutRow } from "@/types/view";
 
 export async function GET() {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("workouts")
-    .select("id, title, notes, scheduled_for, status, updated_at, created_at")
-    .eq("user_id", user.id)
-    .order("scheduled_for", { ascending: true, nullsFirst: true });
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const workouts = await getUserWorkouts(user.id, { client: supabase });
+    return NextResponse.json({ data: workouts });
+  } catch (error) {
+    console.error("Failed to load workouts", error);
+    return NextResponse.json({ error: "Failed to load workouts" }, { status: 500 });
   }
-
-  return NextResponse.json({ data });
 }
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseRouteHandlerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser({ client: supabase });
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const payload = (await request.json()) as Partial<Database["public"]["Tables"]["workouts"]["Insert"]>;
+  const payload = (await request.json()) as Partial<WorkoutRow>;
   const validation = validateWorkoutForm({
     title: payload.title ?? "",
     scheduled_for: payload.scheduled_for ?? undefined,
@@ -49,21 +41,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validation.message }, { status: 400 });
   }
 
-  const { data, error } = await supabase
-    .from("workouts")
-    .insert({
-      user_id: user.id,
-      title: payload.title!,
-      notes: payload.notes ?? null,
-      scheduled_for: payload.scheduled_for ?? null,
-      status: payload.status ?? "draft",
-    })
-    .select("*")
-    .single();
+  try {
+    const workout = await createWorkout(
+      user.id,
+      {
+        title: payload.title,
+        notes: payload.notes ?? null,
+        scheduled_for: payload.scheduled_for ?? null,
+        status: payload.status ?? "draft",
+      },
+      { client: supabase }
+    );
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data: workout }, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create workout", error);
+    return NextResponse.json({ error: "Failed to create workout" }, { status: 500 });
   }
-
-  return NextResponse.json({ data }, { status: 201 });
 }

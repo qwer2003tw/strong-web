@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import type { ThemePreference } from "@/lib/database.types";
+import type { ThemePreference } from "@/types/db";
 
 type ThemeContextValue = {
   theme: ThemePreference;

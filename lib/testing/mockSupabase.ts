@@ -1,4 +1,4 @@
-import type { ThemePreference, UnitSystem } from "@/lib/database.types";
+import type { ThemePreference, UnitSystem } from "@/types/db";
 
 type Profile = {
   id: string;

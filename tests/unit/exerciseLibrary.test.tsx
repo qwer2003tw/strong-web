@@ -49,8 +49,7 @@ describe("ExerciseLibrary", () => {
             muscle_group: "Hamstrings",
             equipment: "Barbell",
             notes: "Focus on hinge",
-            user_id: "user-123",
-            created_at: "2024-01-01T00:00:00Z",
+
             updated_at: "2024-01-02T00:00:00Z",
           },
         ],
@@ -79,8 +78,7 @@ describe("ExerciseLibrary", () => {
               muscle_group: "Quads",
               equipment: "Barbell",
               notes: "Keep torso upright",
-              user_id: "user-123",
-              created_at: "2024-01-03T00:00:00Z",
+
               updated_at: "2024-01-03T00:00:00Z",
             },
           }),
@@ -102,8 +100,7 @@ describe("ExerciseLibrary", () => {
             muscle_group: "Chest",
             equipment: "Barbell",
             notes: "Arch back",
-            user_id: "user-123",
-            created_at: "2024-01-01T00:00:00Z",
+
             updated_at: "2024-01-02T00:00:00Z",
           },
         ]}

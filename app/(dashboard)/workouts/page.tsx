@@ -1,39 +1,20 @@
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { WorkoutsDashboard } from "@/components/features/workouts/workouts-dashboard";
+import { getCurrentUser } from "@/lib/services/authService";
+import { getUserWorkouts } from "@/lib/services/workoutService";
 
 export const revalidate = 0;
 
 export default async function WorkoutsPage() {
-  const supabase = await createServerSupabaseClient();
-  let userId: string | null = null;
-
-  try {
-    const { data, error } = await supabase.auth.getUser();
-    if (!error) {
-      userId = data.user?.id ?? null;
-    }
-  } catch (error) {
-    console.error('Failed to resolve Supabase user', error);
-  }
-
-  if (!userId) {
+  const user = await getCurrentUser();
+  if (!user) {
     return <WorkoutsDashboard initialWorkouts={[]} />;
   }
 
   try {
-    const { data, error } = await supabase
-      .from('workouts')
-      .select('id, title, notes, scheduled_for, status, created_at, updated_at')
-      .eq('user_id', userId)
-      .order('scheduled_for', { ascending: true, nullsFirst: true });
-
-    if (error) {
-      throw error;
-    }
-
-    return <WorkoutsDashboard initialWorkouts={data ?? []} />;
+    const workouts = await getUserWorkouts(user.id);
+    return <WorkoutsDashboard initialWorkouts={workouts} />;
   } catch (error) {
-    console.error('Failed to load workouts', error);
+    console.error("Failed to load workouts", error);
     return <WorkoutsDashboard initialWorkouts={[]} />;
   }
 }

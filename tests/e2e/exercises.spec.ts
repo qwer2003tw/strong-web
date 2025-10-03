@@ -122,8 +122,8 @@ const supabaseStub = createServer(async (req, res) => {
       if (orderParam) {
         const [column, direction] = orderParam.split(".");
         items = [...items].sort((a, b) => {
-          const aValue = (a as Record<string, unknown>)[column];
-          const bValue = (b as Record<string, unknown>)[column];
+          const aValue = (a as unknown as Record<string, unknown>)[column];
+          const bValue = (b as unknown as Record<string, unknown>)[column];
           if (typeof aValue === "string" && typeof bValue === "string") {
             return direction === "desc" ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
           }

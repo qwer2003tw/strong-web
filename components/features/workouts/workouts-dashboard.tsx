@@ -13,7 +13,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import type { Database } from "@/lib/database.types";
+import type { WorkoutSummaryView } from "@/types/view";
 import { validateWorkoutForm } from "@/lib/validation";
 import { readCache, writeCache } from "@/lib/idb";
 import { Button } from "@/components/ui/button";
@@ -24,13 +24,13 @@ import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 
-const statusOptions: Database["public"]["Tables"]["workouts"]["Row"]["status"][] = [
+type Workout = WorkoutSummaryView;
+
+const statusOptions: Workout["status"][] = [
   "draft",
   "scheduled",
   "completed",
 ];
-
-type Workout = Database["public"]["Tables"]["workouts"]["Row"];
 
 interface WorkoutsDashboardProps {
   initialWorkouts: Workout[];
