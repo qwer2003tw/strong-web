@@ -28,6 +28,12 @@ export const AuthAPI = {
   async getSession(options?: ApiRequestOptions): Promise<ApiResponse<Session>> {
     try {
       const supabase = await resolveClient(options);
+      // First verify the user with getUser() for better security
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        return { data: null, error: createApiError("Unable to resolve authenticated session", userError) };
+      }
+
       const { data, error } = await supabase.auth.getSession();
       if (error || !data.session) {
         return { data: null, error: createApiError("Unable to resolve authenticated session", error) };
@@ -62,9 +68,10 @@ export const AuthAPI = {
   ): Promise<ApiResponse<ProfileRow>> {
     try {
       const supabase = await resolveClient(options);
+      const upsertData = { ...payload, id: userId } as any;
       const query = supabase
         .from("profiles")
-        .upsert({ ...payload, id: userId });
+        .upsert(upsertData);
       if (options?.signal) {
         query.abortSignal(options.signal);
       }

@@ -1,9 +1,8 @@
 "use client";
 
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import type { SupabaseClient, Session } from "@supabase/supabase-js";
 import type { Database } from "@/types/db";
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
 interface SupabaseProviderProps {
@@ -12,6 +11,7 @@ interface SupabaseProviderProps {
 }
 
 const SupabaseClientContext = createContext<SupabaseClient<Database> | null>(null);
+const SessionContext = createContext<Session | null>(null);
 
 export function useSupabaseClient() {
   const client = useContext(SupabaseClientContext);
@@ -21,17 +21,40 @@ export function useSupabaseClient() {
   return client;
 }
 
+export function useSession() {
+  return useContext(SessionContext);
+}
+
 export function SupabaseSessionProvider({
   initialSession,
   children,
 }: SupabaseProviderProps) {
   const client = useMemo(() => createBrowserSupabaseClient(), []) as SupabaseClient<Database>;
+  const [session, setSession] = useState<Session | null>(initialSession);
+
+  useEffect(() => {
+    // Get initial session
+    client.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [client]);
 
   return (
     <SupabaseClientContext.Provider value={client}>
-      <SessionContextProvider supabaseClient={client} initialSession={initialSession}>
+      <SessionContext.Provider value={session}>
         {children}
-      </SessionContextProvider>
+      </SessionContext.Provider>
     </SupabaseClientContext.Provider>
   );
 }
