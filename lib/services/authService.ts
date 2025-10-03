@@ -1,4 +1,4 @@
-import type { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { AuthAPI } from "@/lib/api/authApi";
 import type { ApiRequestOptions } from "@/types/api";
 import { unwrapApiResponse } from "@/types/api";
@@ -29,17 +29,6 @@ export async function requireUser(options?: ApiRequestOptions): Promise<User> {
   return user;
 }
 
-/**
- * Resolves the active Supabase session if available.
- */
-export async function getCurrentSession(options?: ApiRequestOptions): Promise<Session | null> {
-  const response = await AuthAPI.getSession(options);
-  if (response.error) {
-    console.debug("authService:getCurrentSession", response.error.message);
-    return null;
-  }
-  return response.data;
-}
 
 /**
  * Loads the profile associated with the provided user identifier.

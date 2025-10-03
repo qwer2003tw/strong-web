@@ -95,9 +95,8 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
     }
     if (typeof window !== "undefined") {
       window.localStorage.setItem(successStorageKey, "Settings updated");
-      window.setTimeout(() => {
-        router.refresh();
-      }, 500);
+      // Use full page reload to ensure locale change takes effect properly
+      window.location.reload();
     } else {
       router.refresh();
     }

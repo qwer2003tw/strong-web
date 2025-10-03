@@ -25,24 +25,6 @@ export const AuthAPI = {
     }
   },
 
-  async getSession(options?: ApiRequestOptions): Promise<ApiResponse<Session>> {
-    try {
-      const supabase = await resolveClient(options);
-      // First verify the user with getUser() for better security
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData.user) {
-        return { data: null, error: createApiError("Unable to resolve authenticated session", userError) };
-      }
-
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !data.session) {
-        return { data: null, error: createApiError("Unable to resolve authenticated session", error) };
-      }
-      return { data: data.session, error: null };
-    } catch (error) {
-      return { data: null, error: createApiError("Unexpected error while resolving session", error) };
-    }
-  },
 
   async getProfile(userId: string, options?: ApiRequestOptions): Promise<ApiResponse<ProfileRow>> {
     try {

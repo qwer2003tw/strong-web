@@ -117,15 +117,6 @@ export function createMockSupabaseClient() {
 
   return {
     auth: {
-      async getSession() {
-        if (!state.userId) {
-          return { data: { session: null }, error: null };
-        }
-        return {
-          data: { session: { user: { id: state.userId } } },
-          error: null,
-        };
-      },
       async getUser() {
         if (!state.userId) {
           return { data: { user: null }, error: null };

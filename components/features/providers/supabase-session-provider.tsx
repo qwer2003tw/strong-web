@@ -1,17 +1,17 @@
 "use client";
 
-import type { SupabaseClient, Session } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "@/types/db";
 import { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
 interface SupabaseProviderProps {
-  initialSession: Session | null;
+  initialUser: User | null;
   children: React.ReactNode;
 }
 
 const SupabaseClientContext = createContext<SupabaseClient<Database> | null>(null);
-const SessionContext = createContext<Session | null>(null);
+const UserContext = createContext<User | null>(null);
 
 export function useSupabaseClient() {
   const client = useContext(SupabaseClientContext);
@@ -21,28 +21,30 @@ export function useSupabaseClient() {
   return client;
 }
 
-export function useSession() {
-  return useContext(SessionContext);
+export function useUser() {
+  return useContext(UserContext);
 }
 
 export function SupabaseSessionProvider({
-  initialSession,
+  initialUser,
   children,
 }: SupabaseProviderProps) {
   const client = useMemo(() => createBrowserSupabaseClient(), []) as SupabaseClient<Database>;
-  const [session, setSession] = useState<Session | null>(initialSession);
+  const [user, setUser] = useState<User | null>(initialUser);
 
   useEffect(() => {
-    // Get initial session
-    client.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // Verify initial user with getUser() for security
+    client.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes and always re-verify with getUser()
     const {
       data: { subscription },
-    } = client.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    } = client.auth.onAuthStateChange(async (_event) => {
+      // Don't use the session from the callback - always verify with getUser()
+      const { data: { user } } = await client.auth.getUser();
+      setUser(user);
     });
 
     return () => {
@@ -52,9 +54,9 @@ export function SupabaseSessionProvider({
 
   return (
     <SupabaseClientContext.Provider value={client}>
-      <SessionContext.Provider value={session}>
+      <UserContext.Provider value={user}>
         {children}
-      </SessionContext.Provider>
+      </UserContext.Provider>
     </SupabaseClientContext.Provider>
   );
 }

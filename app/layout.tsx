@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/features/providers/app-providers";
 import { defaultLocale, getMessages } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
-import { getCurrentSession, getUserProfile } from "@/lib/services/authService";
+import { getCurrentUser, getUserProfile } from "@/lib/services/authService";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,11 +31,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getCurrentSession();
+  const user = await getCurrentUser();
   let preferredLocale: Locale = defaultLocale;
 
-  if (session?.user?.id) {
-    const profile = await getUserProfile(session.user.id);
+  if (user?.id) {
+    const profile = await getUserProfile(user.id);
     if (profile?.locale) {
       preferredLocale = profile.locale as Locale;
     }
@@ -46,7 +46,7 @@ export default async function RootLayout({
   return (
     <html lang={preferredLocale} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AppProviders session={session ?? null} messages={messages} locale={preferredLocale}>
+        <AppProviders initialUser={user} messages={messages} locale={preferredLocale}>
           {children}
         </AppProviders>
       </body>

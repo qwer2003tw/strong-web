@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { SignInForm } from "@/components/features/auth/sign-in-form";
-import { getCurrentSession } from "@/lib/services/authService";
+import { getCurrentUser } from "@/lib/services/authService";
 
 export default async function SignInPage() {
-  const session = await getCurrentSession();
-  if (session) {
+  const user = await getCurrentUser();
+  if (user) {
     redirect("/workouts");
   }
 
