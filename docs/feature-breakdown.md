@@ -8,8 +8,8 @@
 | --- | :---: | --- | --- |
 | 🔐 Auth 模組 | 🚧 | ✅ Email/Password 登入<br>✅ OAuth (GitHub, Google)<br>✅ 密碼重設流程（含雙語介面）<br>✅ Session 管理與頁面保護 | ⏳ Apple OAuth |
 | 💪 Workout / Exercise CRUD | 🚧 | ✅ 訓練列表與 CRUD<br>✅ 動作庫管理<br>✅ 詳情頁編輯<br>✅ IndexedDB 快取<br>✅ API routes 整合 | ⏳ Routine/Plan 功能<br>⏳ 自動套用模板<br>⏳ 第三方匯入 |
-| 📊 歷史與統計模組 | 🚧 | ✅ 歷史列表<br>✅ 7/30 日訓練趨勢<br>✅ Recharts 圖表<br>✅ 範圍切換<br>✅ IndexedDB 快取 | ⏳ 離線衝突解決<br>⏳ 1RM 估算<br>⏳ 進階分析 API（TODO：擴充 `/api/history` 提供 volume/1RM 統計）<br>⏳ 報表匯出 |
-| 📱 PWA / 離線模組 | 🚧 | ✅ PWA 配置 (next-pwa)<br>✅ Service Worker<br>✅ Manifest<br>✅ 離線橫幅<br>✅ IndexedDB 快取 | ⏳ 背景同步<br>⏳ 離線衝突處理<br>⏳ 通知策略 |
+| 📊 歷史與統計模組 | 🚧 | ✅ 歷史列表<br>✅ 7/30 日訓練趨勢<br>✅ Recharts 圖表<br>✅ 範圍切換<br>✅ IndexedDB 快取 | ⏳ 離線衝突解決<br>⏳ 1RM 估算<br>⏳ 進階分析 API<br>⏳ 報表匯出 |
+| 📱 PWA / 離線模組 | 🚧 | ✅ PWA 配置 (next-pwa)<br>✅ Manifest<br>✅ 離線橫幅<br>✅ IndexedDB 快取 | ⏳ 自訂 Service Worker（建立 `public/sw.js` 或調整 next-pwa 產出）<br>⏳ 背景同步<br>⏳ 離線衝突處理<br>⏳ 通知策略 |
 | ⚙️ 設定與偏好模組 | 🚧 | ✅ 單位切換 (kg/lb)<br>✅ 主題切換<br>✅ 個人資料編輯<br>✅ 多語系 (zh-TW/en)<br>✅ 訓練資料匯出 | ⏳ 通知偏好<br>⏳ 可及性最佳化 (WCAG 2.1 AA) |
 | 🔌 外部 API / 整合模組 | ❌ | ✅ 內部 API routes (基礎) | ⏳ 公開 REST API<br>⏳ GraphQL 端點<br>⏳ 匯入 webhook |
 | 🔒 監控與安全模組 | 🚧 | ✅ Supabase 身分驗證<br>✅ Row Level Security (RLS)<br>✅ 16 個安全策略<br>✅ SQL 遷移腳本 | ⏳ 審計日誌<br>⏳ Rate Limit<br>⏳ 進階監控 (Sentry/PostHog) |
@@ -42,7 +42,8 @@
 - **單元測試：** `tests/unit/workoutsDashboard.test.tsx`, `tests/unit/workoutDetail.test.tsx`, `tests/unit/workoutsApi.test.ts`, `tests/unit/exerciseLibrary.test.tsx`, `tests/unit/exercisesRoute.test.ts`
 - **E2E 測試：** `tests/e2e/workouts.spec.ts`, `tests/e2e/exercises.spec.ts`
 
-#### 📊 歷史與統計模組
+#### <a id="history-stats-module"></a>📊 歷史與統計模組
+- **進度現況：** 已完成 7/30 日訓練量趨勢圖表與快取；1RM 估算與相關分析 API 仍為待辦。
 - **歷史儀表板：** `components/features/history/history-dashboard.tsx`
 - **歷史列表：** `components/features/history/history-list.tsx`
 - **歷史篩選器：** `components/features/history/history-filters.tsx`
@@ -56,7 +57,7 @@
 
 #### 📱 PWA / 離線模組
 - **PWA 配置：** `next.config.js`
-- **Service Worker：** `public/sw.js`
+- **Service Worker：** `public/sw.js`（尚未建立，需依下方指引新增）
 - **Manifest：** `public/manifest.json`
 - **離線橫幅：** `components/features/offline/offline-banner.tsx`
 - **IndexedDB：** `lib/idb.ts`
@@ -104,12 +105,12 @@
 
 ### 預期 API / Schema 介面
 - Supabase Auth 內建 `auth.users` 表維護基礎身份資料。
-- `public.user_profiles` 表（`id`, `display_name`, `avatar_url`, `unit_preference`, `created_at`）。
+- `public.profiles` 表（`id`, `email`, `full_name`, `avatar_url`, `locale`, `theme`, `unit_preference`, `created_at`, `updated_at`）。
 - REST 端點：`POST /api/auth/sign-in`、`POST /api/auth/sign-up`、`POST /api/auth/reset`（封裝 Supabase Auth）。
 
 ### 前/後端資產
 - 前端：登入/註冊頁、第三方登入按鈕、錯誤狀態提示、登入後導引。
-- 後端：OAuth provider 設定、自訂 email 範本、Edge Function 觸發器同步 `user_profiles`。
+- 後端：OAuth provider 設定、自訂 email 範本、Edge Function 觸發器同步 `profiles`。
 
 ### 驗收指標
 - 主要身分流程成功率 > 99%。
@@ -134,7 +135,7 @@
 ### 預期 API / Schema 介面
 - 表格：`exercises`（`id`, `user_id`, `name`, `muscle_group`, `is_custom`, `created_at`）。
 - 表格：`workouts`（`id`, `user_id`, `performed_at`, `notes`）。
-- 表格：`workout_sets`（`id`, `workout_id`, `exercise_id`, `set_index`, `weight`, `reps`, `rpe`, `remarks`）。
+- 表格：`workout_entries`（`id`, `workout_id`, `exercise_id`, `position`, `sets`, `reps`, `weight`, `unit`, `notes`, `created_at`, `updated_at`）。
 - REST 端點：`GET/POST /api/exercises`、`GET/POST /api/workouts`、`PATCH/DELETE /api/workouts/:id`。
 
 ### 前/後端資產
@@ -179,6 +180,8 @@
 ### 目標與產出
 - 提供可安裝的 PWA 體驗、離線可用的核心流程與背景同步機制。
 
+> **目前狀態：** 尚未提交 `public/sw.js`，需依 `next-pwa` 設定補上自訂 Service Worker 或調整建置流程。
+
 ### 細項需求（對應 MoSCoW）
 - Must：Manifest、Service Worker、離線核心流程（查看動作、建立/編輯訓練）、回網自動同步。
 - Should：衝突解決策略、背景同步通知。
@@ -198,6 +201,17 @@
 - 前端：PWA 安裝提示、離線模式提示、背景同步 UI、IndexedDB 操作封裝。
 - 後端：Edge Function 支援增量同步（ETag/Last-Modified header）、Web Push 訂閱端點。
 
+### Service Worker 建置指引
+- 目前專案尚未提供 `public/sw.js`，`next-pwa` 會在建置時依 `workboxOptions.swSrc` 引入自訂 Service Worker。
+- 若要啟用自訂 Service Worker，可依以下流程：
+  1. 在 `public/sw.js` 建立 Workbox 腳本，並於檔案開頭匯入 `next-pwa` 產生的預設快取宣告，例如：
+     ```js
+     import { precacheAndRoute } from "workbox-precaching";
+     precacheAndRoute(self.__WB_MANIFEST);
+     ```
+  2. 於 `sw.js` 中追加離線快取、背景同步或推播邏輯，再視需求註冊對應的事件監聽器。
+  3. 參考 [`next-pwa` 官方文件](https://github.com/shadowwalker/next-pwa#custom-service-worker) 驗證建置流程，並透過 `pnpm build` 確認 Service Worker 產出於 `.next/static` 與發佈的 `public/sw.js`。
+
 ### 驗收指標
 - Lighthouse PWA 分數 ≥ 90。
 - 核心頁面離線模式均可讀取資料，並於回網後自動同步。
@@ -213,12 +227,12 @@
 - Could：多語系（zh-TW/en）、個人化儀表板偏好。
 
 ### 跨模組相依與邊界
-- 與 `Auth` 共用 `user_profiles` 資料表與驗證。
+- 與 `Auth` 共用 `profiles` 資料表與驗證，偏好設定欄位（如 `theme`, `unit_preference`, `locale`）直接儲存在此表。
 - 與 `PWA/離線` 共用本地偏好快取與同步策略。
 - 向 `外部 API/整合` 暴露偏好讀取端點以利行動 App 對齊。
 
 ### 預期 API / Schema 介面
-- 表格：`user_preferences`（`user_id`, `theme`, `unit`, `language`, `notifications`, `updated_at`）。
+- 表格：`profiles`（`id`, `email`, `full_name`, `avatar_url`, `locale`, `theme`, `unit_preference`, `created_at`, `updated_at`）。
 - REST 端點：`GET/PUT /api/me/preferences`、`PATCH /api/me/profile`。
 
 ### 前/後端資產
