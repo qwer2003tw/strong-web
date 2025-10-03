@@ -29,18 +29,20 @@ bun dev
 | 8 | [外部 API / 整合模組](docs/feature-breakdown.md#外部-api--整合模組) | Integration Squad（後端 / 平台） | 對外提供 REST/GraphQL 介面與健康平台匯入能力。 |
 
 ### Must（一定要有）
-- **Auth 與 OAuth**：Email/Password + Google/Apple/GitHub（Supabase Auth）。
+- **Auth 與 OAuth**：Email/Password + Google/Apple/GitHub；Facebook 為補充 provider，同樣需通過 Supabase Auth 驗證。
 - **訓練紀錄 CRUD**：動作庫、自訂動作、重量/次數/組數、備註、RPE（可選欄位）。
-- **歷史與基本統計**：依日期、動作、肌群查詢；近 7/30 天訓練量趨勢（Recharts 視覺化）。1RM 估算趨勢仍為待辦，詳見《Strong Web 模組化功能拆解》的[歷史與統計模組待辦項目](docs/feature-breakdown.md#history-stats-module)。
-- **PWA 與離線支援**：核心流程離線可用（查看動作、建立/編輯訓練）；回網後自動同步；支援安裝至裝置。
-- **設定頁**：切換單位（kg/lb）、主題（暗色優先）、個人資料編輯。
+- **歷史與 Dashboard**：依日期、動作、肌群查詢；近 7/30 天訓練量與 1RM 估算趨勢；Dashboard 模組須提供每週訓練次數、單動作 1RM/PR 趨勢與訓練量 Volume 圖表（Recharts）。
+- **PWA 與離線支援**：核心流程離線可用（查看動作、建立/編輯訓練）；回網後自動同步；支援安裝至裝置（Add to Home Screen / Desktop）。
+- **設定頁**：重量/距離/尺寸單位切換、主題（暗色/自動暗色）、第一週起始日（Sunday/Monday）、Prevent Screen Sleep、休息計時器（預設值、增量、自動啟動、音效/震動）、個人資料編輯。
 - **API**：公開 REST API 並透過 Auth 保護，確保 Strong App 與 Web 互通。
-- **安全與隱私**：Row Level Security、最小權限控管、密碼與 Token 管理、資料匯出（CSV/JSON）。
+- **安全與隱私**：Row Level Security、最小權限控管、密碼與 Token 管理、資料匯出（CSV/JSON 單向下載）、帳號刪除流程（Danger Zone + 軟刪/硬刪策略）。
 - **部署**：前端 Vercel、後端 Supabase，具備基本監控與日誌。
 
 ### MVP 進度摘要
 - ✅ 訓練量趨勢：歷史頁面已提供 7/30 天訓練量 Recharts 視覺化，支援資料範圍切換與 IndexedDB 快取。
+- ⏳ Dashboard 視覺化：每週訓練次數、1RM/PR 趨勢與 Volume 圖表尚未完成，待 Dashboard 模組頁面與 API 聚合。
 - ⏳ 1RM 分析：估算演算法與視覺化尚未完成，待 `GET /api/analytics/one-rep-max` 與前端圖表實作。
+- ⏳ 設定擴充：休息計時器、Prevent Screen Sleep 與距離/尺寸單位切換仍待實作與測試。
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

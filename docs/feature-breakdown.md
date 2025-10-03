@@ -6,14 +6,16 @@
 
 | 模組 | 狀態 | 已完成項目 | 待辦項目 |
 | --- | :---: | --- | --- |
-| 🔐 Auth 模組 | 🚧 | ✅ Email/Password 登入<br>✅ OAuth (GitHub, Google)<br>✅ 密碼重設流程（含雙語介面）<br>✅ Session 管理與頁面保護 | ⏳ Apple OAuth |
-| 💪 Workout / Exercise CRUD | 🚧 | ✅ 訓練列表與 CRUD<br>✅ 動作庫管理<br>✅ 詳情頁編輯<br>✅ IndexedDB 快取<br>✅ API routes 整合 | ⏳ Routine/Plan 功能<br>⏳ 自動套用模板<br>⏳ 第三方匯入 |
-| 📊 歷史與統計模組 | 🚧 | ✅ 歷史列表<br>✅ 7/30 日訓練趨勢<br>✅ Recharts 圖表<br>✅ 範圍切換<br>✅ IndexedDB 快取 | ⏳ 離線衝突解決<br>⏳ 1RM 估算<br>⏳ 進階分析 API<br>⏳ 報表匯出 |
-| 📱 PWA / 離線模組 | 🚧 | ✅ PWA 配置 (next-pwa)<br>✅ Manifest<br>✅ 離線橫幅<br>✅ IndexedDB 快取 | ⏳ 自訂 Service Worker（建立 `public/sw.js` 或調整 next-pwa 產出）<br>⏳ 背景同步<br>⏳ 離線衝突處理<br>⏳ 通知策略 |
-| ⚙️ 設定與偏好模組 | 🚧 | ✅ 單位切換 (kg/lb)<br>✅ 主題切換<br>✅ 個人資料編輯<br>✅ 多語系 (zh-TW/en)<br>✅ 訓練資料匯出 | ⏳ 通知偏好<br>⏳ 可及性最佳化 (WCAG 2.1 AA) |
-| 🔌 外部 API / 整合模組 | ❌ | ✅ 內部 API routes (基礎) | ⏳ 公開 REST API<br>⏳ GraphQL 端點<br>⏳ 匯入 webhook |
-| 🔒 監控與安全模組 | 🚧 | ✅ Supabase 身分驗證<br>✅ Row Level Security (RLS)<br>✅ 16 個安全策略<br>✅ SQL 遷移腳本 | ⏳ 審計日誌<br>⏳ Rate Limit<br>⏳ 進階監控 (Sentry/PostHog) |
-| 🚀 部署 / DevOps 模組 | 🚧 | ✅ next-pwa 配置<br>✅ 基本腳本 (lint/test/type-check)<br>✅ Jest 單元測試 (13 個)<br>✅ Playwright E2E (6 個) | ⏳ CI/CD 流程<br>⏳ 自動化備份<br>⏳ 回復演練 |
+| 🔐 Auth 模組 | 🚧 | ✅ Email/Password 登入<br>✅ OAuth (GitHub, Google)<br>✅ 密碼重設流程（含雙語介面）<br>✅ Session 管理與頁面保護 | ⏳ Apple OAuth<br>⏳ Facebook OAuth（補充） |
+| 💪 Workout / Exercise CRUD | 🚧 | ✅ 訓練列表與 CRUD<br>✅ 動作庫管理<br>✅ 詳情頁編輯<br>✅ IndexedDB 快取<br>✅ API routes 整合 | ⏳ Routine/Plan 功能<br>⏳ 自動套用模板<br>⏳ 不完整組處理<br>⏳ 完成組鎖定<br>⏳ 第三方匯入 |
+| 📊 Dashboard 模組 | ❌ | - | ⏳ 每週訓練次數圖表<br>⏳ 單動作 1RM/PR 趨勢<br>⏳ 訓練量 Volume 趨勢<br>⏳ 整合 Recharts |
+| 📈 歷史與統計模組 | 🚧 | ✅ 歷史列表<br>✅ 7/30 日訓練趨勢<br>✅ Recharts 圖表<br>✅ 範圍切換<br>✅ IndexedDB 快取 | ⏳ 離線衝突解決<br>⏳ 1RM 估算<br>⏳ 進階分析 API<br>⏳ 報表匯出 |
+| 📱 PWA / 離線模組 | 🚧 | ✅ PWA 配置 (next-pwa)<br>✅ Manifest<br>✅ 離線橫幅<br>✅ IndexedDB 快取 | ⏳ 自訂 Service Worker（建立 `public/sw.js` 或調整 next-pwa 產出）<br>⏳ 背景同步<br>⏳ 離線衝突處理<br>⏳ 通知策略<br>⏳ 安裝到裝置 |
+| ⚙️ 設定與偏好模組 | 🚧 | ✅ 單位切換 (kg/lb)<br>✅ 主題切換<br>✅ 個人資料編輯<br>✅ 多語系 (zh-TW/en)<br>✅ 訓練資料匯出 | ⏳ 距離單位切換 (km/mi)<br>⏳ 尺寸單位切換 (cm/inch)<br>⏳ 自動/系統主題模式<br>⏳ 休息計時器（預設值、增量、自動啟動、音效/震動）<br>⏳ 螢幕常亮設定<br>⏳ 第一週起始日<br>⏳ 通知偏好<br>⏳ 可及性最佳化 (WCAG 2.1 AA) |
+| 📏 身體測量模組 | ❌ | - | ⏳ 體重/體脂追蹤<br>⏳ 飲食熱量記錄<br>⏳ 身體圍度測量<br>⏳ 健康平台同步 |
+| � 外部 API / 整合模組 | ❌ | ✅ 內部 API routes (基礎) | ⏳ 公開 REST API<br>⏳ GraphQL 端點<br>⏳ Apple Health 整合<br>⏳ Google Fit 整合<br>⏳ Health Connect (Android)<br>⏳ 匯入 webhook |
+| 🔒 監控與安全模組 | 🚧 | ✅ Supabase 身分驗證<br>✅ Row Level Security (RLS)<br>✅ 16 個安全策略<br>✅ SQL 遷移腳本 | ⏳ 審計日誌<br>⏳ Rate Limit<br>⏳ 進階監控 (Sentry/PostHog)<br>⏳ 資料匯出單向限制（CSV/JSON）<br>⏳ 帳號刪除流程（Danger Zone + 軟刪/硬刪） |
+| �🚀 部署 / DevOps 模組 | 🚧 | ✅ next-pwa 配置<br>✅ 基本腳本 (lint/test/type-check)<br>✅ Jest 單元測試 (13 個)<br>✅ Playwright E2E (6 個) | ⏳ CI/CD 流程<br>⏳ 自動化備份<br>⏳ 回復演練 |
 
 **圖示說明：**
 - 🚧 進行中
@@ -41,6 +43,11 @@
 - **IndexedDB：** `lib/idb.ts`
 - **單元測試：** `tests/unit/workoutsDashboard.test.tsx`, `tests/unit/workoutDetail.test.tsx`, `tests/unit/workoutsApi.test.ts`, `tests/unit/exerciseLibrary.test.tsx`, `tests/unit/exercisesRoute.test.ts`
 - **E2E 測試：** `tests/e2e/workouts.spec.ts`, `tests/e2e/exercises.spec.ts`
+
+#### 📊 Dashboard 模組
+- **待建置元件：** `components/features/dashboard/weekly-volume-chart.tsx`、`components/features/dashboard/pr-trend-chart.tsx`、`components/features/dashboard/volume-trend-chart.tsx`
+- **預計頁面：** `app/(dashboard)/overview/page.tsx`
+- **資料來源：** `lib/analytics/dashboardQueries.ts`（待建置）
 
 #### <a id="history-stats-module"></a>📊 歷史與統計模組
 - **進度現況：** 已完成 7/30 日訓練量趨勢圖表與快取；1RM 估算與相關分析 API 仍為待辦。
@@ -94,7 +101,7 @@
 - 建立使用者個人資料初始化流程與必要的行為追蹤（登入成功、失敗）。
 
 ### 細項需求（對應 MoSCoW）
-- Must：Email/Password、Google、Apple、GitHub OAuth 登入流程。
+- Must：Email/Password、Google、Apple、GitHub OAuth 登入流程；Facebook 作為補充登入方案並須提供同等安全驗證。
 - Should：登入 / 註冊表單的可用性最佳化（鍵盤可達性、狀態提示）。
 - Won't：社群或追蹤類功能不在此模組範疇。
 
@@ -109,8 +116,8 @@
 - REST 端點：`POST /api/auth/sign-in`、`POST /api/auth/sign-up`、`POST /api/auth/reset`（封裝 Supabase Auth）。
 
 ### 前/後端資產
-- 前端：登入/註冊頁、第三方登入按鈕、錯誤狀態提示、登入後導引。
-- 後端：OAuth provider 設定、自訂 email 範本、Edge Function 觸發器同步 `profiles`。
+- 前端：登入/註冊頁、第三方登入按鈕（Google/GitHub/Apple/Facebook）、錯誤狀態提示、登入後導引。
+- 後端：OAuth provider 設定（含 Apple Sign In 與 Facebook App 設定）、自訂 email 範本、Edge Function 觸發器同步 `profiles`。
 
 ### 驗收指標
 - 主要身分流程成功率 > 99%。
@@ -124,7 +131,7 @@
 
 ### 細項需求（對應 MoSCoW）
 - Must：訓練紀錄 CRUD、動作庫、自訂動作欄位與 RPE（可選）。
-- Should：Routine/Plan 建立與快速套用、複製上次訓練。
+- Should：Routine/Plan 建立與快速套用、複製上次訓練、不完整組處理（略過/提示/保留）、完成組鎖定（避免誤編輯）。
 - Could：第三方匯入（Apple Health、Google Fit）。
 
 ### 跨模組相依與邊界
@@ -146,6 +153,36 @@
 - CRUD API 於 P95 延遲 < 300 ms，錯誤率 < 1%。
 - 表單完成率 ≥ 85%，並通過 Playwright E2E 測試。
 - 離線建立後回網自動同步成功率 ≥ 98%。
+
+## Dashboard 模組
+> 詳細執行規格請參考《[Dashboard 模組執行規格](dashboard-spec.md)》
+### 目標與產出
+- 提供訓練概覽儀表板，快速掌握近期期次量與表現趨勢。
+- 建立週訓練次數、單動作 PR 與訓練量視覺化，支援教練與使用者決策。
+
+### 細項需求（對應 MoSCoW）
+- Must：每週訓練次數柱狀圖、單動作 1RM/PR 趨勢折線圖、訓練量（Volume）趨勢圖。
+- Should：圖表篩選（肌群、動作）、自訂期間、錯誤與空資料狀態提示。
+- Could：分享截圖/報告、儀表板小工具拖拉排序。
+
+### 跨模組相依與邊界
+- 依賴 `Workout/Exercise CRUD` 提供結構化訓練資料與 RPE。
+- 與 `歷史與統計` 共用分析 API 與快取策略，避免重複計算。
+- 與 `設定與偏好` 對接單位偏好與主題，以確保視覺一致性。
+
+### 預期 API / Schema 介面
+- REST：`GET /api/dashboard/weekly-frequency`、`GET /api/dashboard/pr-trend`、`GET /api/dashboard/volume-trend`（可由 `/api/history` 派生）。
+- 視圖：`v_weekly_workout_counts`、`v_exercise_pr_trends`、`v_training_volume_trends`（待設計）。
+- IndexedDB：`dashboard_snapshots` store 快取最近一週資料供離線使用。
+
+### 前/後端資產
+- 前端：週頻率柱狀圖元件、PR 趨勢折線圖、Volume 面積圖、儀表板篩選器與空狀態。
+- 後端：聚合查詢、預先計算排程、Reports Edge Function（用於生成分享連結）。
+
+### 驗收指標
+- 儀表板主要圖表載入時間 < 1 秒（快取後 < 500 ms）。
+- PR 趨勢計算誤差 < 1%，資料更新頻率至少每日一次。
+- 圖表具備 Keyboard/Screen Reader 支援並通過無障礙檢測。
 
 ## 歷史與統計模組
 ### 目標與產出
@@ -183,7 +220,7 @@
 > **目前狀態：** 尚未提交 `public/sw.js`，需依 `next-pwa` 設定補上自訂 Service Worker 或調整建置流程。
 
 ### 細項需求（對應 MoSCoW）
-- Must：Manifest、Service Worker、離線核心流程（查看動作、建立/編輯訓練）、回網自動同步。
+- Must：Manifest、Service Worker、離線核心流程（查看動作、建立/編輯訓練）、回網自動同步、可安裝到裝置（Add to Home Screen / Desktop）。
 - Should：衝突解決策略、背景同步通知。
 - Could：多裝置同步偏好設定。
 
@@ -218,11 +255,12 @@
 - 背景同步失敗率 < 3%，並具備重試機制。
 
 ## 設定與偏好模組
+> 休息計時器詳細規格請參考《[休息計時器執行規格](rest-timer-spec.md)》
 ### 目標與產出
 - 提供使用者管理單位、主題、個人資料與通知偏好等設定。
 
 ### 細項需求（對應 MoSCoW）
-- Must：單位切換（kg/lb）、主題切換（暗色預設）、個人資料編輯。
+- Must：單位切換（重量 kg/lb、距離 km/mi、尺寸 cm/inch）、主題切換（暗色/自動暗色）、第一週起始日設定（Sunday/Monday）、Prevent Screen Sleep、休息計時器（預設值、可調增量、自動啟動、音效/震動提醒）、個人資料編輯。
 - Should：可用性與可達性強化（WCAG 2.1 AA）、快捷鍵設定管理。
 - Could：多語系（zh-TW/en）、個人化儀表板偏好。
 
@@ -236,8 +274,8 @@
 - REST 端點：`GET/PUT /api/me/preferences`、`PATCH /api/me/profile`。
 
 ### 前/後端資產
-- 前端：設定頁、偏好表單、無障礙導覽與快捷鍵提示。
-- 後端：Supabase function 驗證偏好變更、偏好同步 webhook。
+- 前端：設定頁、偏好表單、單位/主題/週起始日控制、休息計時器與螢幕常亮設定 UI、無障礙導覽與快捷鍵提示。
+- 後端：Supabase function 驗證偏好變更、偏好同步 webhook、裝置層 Prevent Sleep 設定同步 API。
 
 ### 驗收指標
 - 偏好更新 API P95 < 200 ms，錯誤率 < 0.5%。
@@ -251,7 +289,7 @@
 ### 細項需求（對應 MoSCoW）
 - Must：公開 REST API（受 Auth 保護）。
 - Should：GraphQL 端點與一致型別系統。
-- Could：Apple Health、Google Fit 匯入；週報分享公開頁。
+- Could：Apple Health、Google Fit、Health Connect (Android) 匯入；週報分享公開頁。
 
 ### 跨模組相依與邊界
 - 與 `Auth` 整合 Token 與權限，確保 RLS 規則一致。
@@ -277,7 +315,7 @@
 - 確保系統安全性、可觀測性與法遵要求，建立事件與警報管道。
 
 ### 細項需求（對應 MoSCoW）
-- Must：Row Level Security、最小權限控管、密碼與 Token 管理、資料匯出。
+- Must：Row Level Security、最小權限控管、密碼與 Token 管理、資料匯出（CSV/JSON 單向下載）、帳號刪除流程（Danger Zone + 軟刪/硬刪策略）。
 - Should：Sentry、PostHog 等監控與行為追蹤、Rate Limit、審計日誌。
 - Could：自動化滲透測試、進階威脅偵測。
 
@@ -287,12 +325,13 @@
 
 ### 預期 API / Schema 介面
 - 審計日誌表：`security_audit_logs`（`id`, `user_id`, `action`, `resource`, `timestamp`, `metadata`）。
-- 匯出端點：`POST /api/me/export`（產生 CSV/JSON）。
+- 匯出端點：`POST /api/me/export`（產生 CSV/JSON，僅供下載不支援匯入）。
+- Danger Zone：`DELETE /api/me`（軟刪排程）與 `POST /api/me/purge`（管理者硬刪）。
 - Rate limit 設定：`/api/_middleware` Edge 中介層。
 
 ### 前/後端資產
-- 前端：安全設定 UI、匯出資料流程、異常提示。
-- 後端：Supabase Policy、監控管線（Sentry、PostHog、Log Drain）、自動化警報設定。
+- 前端：安全設定 UI、資料匯出流程、帳號刪除 Danger Zone（雙重確認、後撤提示）、異常提示。
+- 後端：Supabase Policy、監控管線（Sentry、PostHog、Log Drain）、自動化警報設定、帳號軟刪排程與硬刪批次任務。
 
 ### 驗收指標
 - 通過安全稽核（RLS policy 覆蓋率 100%）。
