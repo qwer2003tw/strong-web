@@ -50,7 +50,8 @@
 - **趨勢圖表：** `components/features/history/history-trend-chart.tsx`
 - **歷史頁面：** `app/(dashboard)/history/page.tsx`
 - **歷史工具函式：** `lib/history.ts`
-- **API Routes：** `app/api/history/route.ts`, `app/api/analytics/volume/route.ts`
+- **API Routes：** `app/api/history/route.ts`
+- **TODO：進階統計端點：** `app/api/analytics/volume/route.ts`（預計改寫為 `/api/history` 子路由提供 volume/1RM 相關資料）
 - **單元測試：** `tests/unit/historyDashboard.test.tsx`, `tests/unit/historyAnalytics.test.ts`, `tests/unit/historyRouteHandlers.test.ts`
 - **E2E 測試：** `tests/e2e/history.spec.ts`
 
@@ -163,7 +164,8 @@
 
 ### 預期 API / Schema 介面
 - 視圖：`v_user_training_volume`（`user_id`, `exercise_id`, `total_volume`, `period`）。
-- REST 端點：`GET /api/history?range=7d|30d`、`GET /api/analytics/volume`、`GET /api/analytics/one-rep-max`。
+- REST 端點：`GET /api/history?range=7d|30d`（已提供歷史趨勢與總量資料）。
+- TODO：`GET /api/analytics/volume`、`GET /api/analytics/one-rep-max`（預計獨立為 `/api/history/volume`、`/api/history/one-rep-max` 以提供進階分析）。
 
 ### 前/後端資產
 - 前端：歷史列表頁、圖表元件、篩選器、差異提示 UI。
@@ -256,8 +258,8 @@
 - 消費 `Workout/Exercise CRUD`、`歷史與統計` 的資料結構。
 - 與 `監控與安全` 協作以建立 Rate Limit、審計與 API 金鑰管理。
 
-### 預期 API / Schema 介面
-- REST：`GET /api/v1/workouts`, `POST /api/v1/import`, `GET /api/v1/analytics`。
+- REST：`GET /api/v1/workouts`, `POST /api/v1/import`, `GET /api/v1/history`。
+- TODO：`GET /api/v1/analytics`（待 `進階分析 API` 完成後改綁 `/api/history` 擴充版端點）。
 - GraphQL schema：`type Workout`, `type Exercise`, `type TrainingVolume`, `query workouts`, `mutation syncWorkout`。
 - Webhook：`POST /webhooks/health-sync` 處理第三方匯入。
 
