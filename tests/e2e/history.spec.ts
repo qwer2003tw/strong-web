@@ -1,4 +1,24 @@
 import { test, expect } from "@playwright/test";
+
+type OneRepMaxStub = {
+  series: Array<{
+    exerciseId: string;
+    exerciseName: string;
+    performedOn: string;
+    estimatedOneRm: number;
+    reps: number;
+    weight: number;
+    unit: string | null;
+    sourceEntryId: string | null;
+  }>;
+  max: OneRepMaxStub["series"][number] | null;
+  method: "epley" | "brzycki";
+  filters: {
+    exerciseIds: string[];
+    dateFrom: string | null;
+    dateTo: string | null;
+  };
+};
 import { createServer, type Server } from "http";
 
 function createSessionCookie() {
@@ -130,6 +150,75 @@ test.describe("history dashboard", () => {
       lastSyncedAt: "2024-03-02T00:00:00Z",
     };
 
+    const oneRepMaxPayload: Record<"epley" | "brzycki", { data: OneRepMaxStub; lastSyncedAt: string }> = {
+        epley: {
+          data: {
+            series: [
+              {
+                exerciseId: "ex-1",
+                exerciseName: "Bench Press",
+                performedOn: "2024-03-01T00:00:00.000Z",
+                estimatedOneRm: 120,
+                reps: 5,
+                weight: 100,
+                unit: "metric",
+                sourceEntryId: "entry-1",
+              },
+            ],
+            max: {
+              exerciseId: "ex-1",
+              exerciseName: "Bench Press",
+              performedOn: "2024-03-01T00:00:00.000Z",
+              estimatedOneRm: 120,
+              reps: 5,
+              weight: 100,
+              unit: "metric",
+              sourceEntryId: "entry-1",
+            },
+            method: "epley",
+            filters: {
+              exerciseIds: [],
+              dateFrom: "2024-02-24",
+              dateTo: "2024-03-01",
+            },
+          },
+          lastSyncedAt: "2024-03-02T00:00:00Z",
+        },
+        brzycki: {
+          data: {
+            series: [
+              {
+                exerciseId: "ex-2",
+                exerciseName: "Deadlift",
+                performedOn: "2024-03-05T00:00:00.000Z",
+                estimatedOneRm: 180,
+                reps: 3,
+                weight: 150,
+                unit: "metric",
+                sourceEntryId: "entry-2",
+              },
+            ],
+            max: {
+              exerciseId: "ex-2",
+              exerciseName: "Deadlift",
+              performedOn: "2024-03-05T00:00:00.000Z",
+              estimatedOneRm: 180,
+              reps: 3,
+              weight: 150,
+              unit: "metric",
+              sourceEntryId: "entry-2",
+            },
+            method: "brzycki",
+            filters: {
+              exerciseIds: [],
+              dateFrom: "2024-02-24",
+              dateTo: "2024-03-05",
+            },
+          },
+          lastSyncedAt: "2024-03-05T10:00:00Z",
+        },
+      };
+
     await page.route("**/api/history?*", async (route) => {
       const requestUrl = new URL(route.request().url());
       const range = (requestUrl.searchParams.get("range") || "30d") as keyof typeof historyByRange;
@@ -146,6 +235,17 @@ test.describe("history dashboard", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(summaryPayload),
+      });
+    });
+
+    await page.route("**/api/analytics/one-rep-max?*", async (route) => {
+      const url = new URL(route.request().url());
+      const method = (url.searchParams.get("method") ?? "epley") as "epley" | "brzycki";
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { ETag: `"stub-${method}"` },
+        body: JSON.stringify(oneRepMaxPayload[method]),
       });
     });
 
@@ -170,8 +270,11 @@ test.describe("history dashboard", () => {
     const summaryRequestPromise = page.waitForRequest((request) =>
       request.url().includes("/api/analytics/volume")
     );
+    const oneRmRequestPromise = page.waitForRequest((request) =>
+      request.url().includes("/api/analytics/one-rep-max")
+    );
     await page.getByRole("button", { name: "Refresh" }).click();
-    await Promise.all([historyRequestPromise, summaryRequestPromise]);
+    await Promise.all([historyRequestPromise, summaryRequestPromise, oneRmRequestPromise]);
 
     await expect(page.getByText("No sessions yet")).not.toBeVisible();
     const benchEntry = page.locator("div").filter({ hasText: "Bench Press" }).first();
@@ -199,3 +302,13 @@ test.describe("history dashboard", () => {
     await expect(selectedRangeValue).toHaveText("3,000");
   });
 });
+    await expect(page.getByText("Bench Press")).toBeVisible();
+
+    const formulaSelect = page.getByLabel("Formula");
+    await formulaSelect.selectOption("brzycki");
+
+    await page.waitForRequest((request) =>
+      request.url().includes("/api/analytics/one-rep-max") && request.url().includes("method=brzycki")
+    );
+
+    await expect(page.getByText("Deadlift")).toBeVisible();

@@ -113,5 +113,25 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["workout_entries"]["Insert"]>;
       };
     };
+    Functions: {
+      get_one_rep_max: {
+        Args: {
+          exercise_ids?: string[] | null;
+          from_date?: string | null;
+          to_date?: string | null;
+          method?: string | null;
+        };
+        Returns: Array<{
+          exercise_id: string;
+          exercise_name: string | null;
+          performed_on: string | null;
+          estimated_1rm: number | null;
+          reps: number | null;
+          weight: number | null;
+          unit: UnitSystem | null;
+          source_entry_id: string | null;
+        }>;
+      };
+    };
   };
 }

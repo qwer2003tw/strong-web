@@ -2,12 +2,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SettingsPanel } from "@/components/features/settings/settings-panel";
 import type { ThemePreference } from "@/types/db";
-import { upsertUserProfile } from "@/lib/services/authService";
 
 type SupabaseMock = {
   auth: {
     getUser: jest.Mock;
   };
+  from: jest.Mock;
 };
 
 jest.mock("next-intl", () => ({
@@ -24,10 +24,6 @@ jest.mock("@/components/features/providers/supabase-session-provider", () => ({
   useSupabaseClient: () => supabaseClientMock,
 }));
 
-jest.mock("@/lib/services/authService", () => ({
-  upsertUserProfile: jest.fn(),
-}));
-
 let themeValue: ThemePreference = "system";
 const setThemeMock = jest.fn();
 jest.mock("@/components/features/providers/theme-provider", () => ({
@@ -41,19 +37,21 @@ describe("SettingsPanel", () => {
   const realCreateElement = document.createElement.bind(document);
 
   let createElementSpy: jest.SpyInstance;
-  const upsertUserProfileMock = upsertUserProfile as jest.MockedFunction<typeof upsertUserProfile>;
+  let profilesUpsertMock: jest.Mock;
 
   beforeEach(() => {
+    profilesUpsertMock = jest.fn().mockResolvedValue({ error: null });
     supabaseClientMock = {
       auth: {
         getUser: jest.fn().mockResolvedValue({ data: { user: { email: "user@example.com" } }, error: null }),
       },
+      from: jest.fn(() => ({ upsert: profilesUpsertMock })),
     } as unknown as SupabaseMock;
     refreshMock.mockReset();
     setThemeMock.mockReset();
     themeValue = "system";
-    upsertUserProfileMock.mockReset();
     window.localStorage.clear();
+    window.history.replaceState(null, "", "/settings");
     (global as typeof globalThis).fetch = originalFetch;
     URL.createObjectURL = originalCreateObjectURL;
     URL.revokeObjectURL = originalRevokeObjectURL;
@@ -61,6 +59,10 @@ describe("SettingsPanel", () => {
       createElementSpy.mockRestore();
     }
     createElementSpy = jest.spyOn(document, "createElement");
+  });
+
+  afterEach(() => {
+    refreshMock.mockReset();
   });
 
   afterAll(() => {
@@ -89,7 +91,6 @@ describe("SettingsPanel", () => {
   }
 
   it("saves profile changes successfully", async () => {
-    upsertUserProfileMock.mockResolvedValue({ id: "user-123" } as any);
     renderPanel();
 
     const user = userEvent.setup();
@@ -103,21 +104,21 @@ describe("SettingsPanel", () => {
       expect(refreshMock).toHaveBeenCalled();
     });
 
-    expect(upsertUserProfileMock).toHaveBeenCalledWith(
-      "user-123",
-      {
+    expect(supabaseClientMock.from).toHaveBeenCalledWith("profiles");
+    expect(profilesUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "user-123",
         email: "user@example.com",
         full_name: "Existing User",
         locale: "en",
         unit_preference: "metric",
         theme: "system",
-      },
-      { client: supabaseClientMock }
+      })
     );
   });
 
   it("shows an error when saving fails", async () => {
-    upsertUserProfileMock.mockRejectedValue(new Error("Failed to update profile"));
+    profilesUpsertMock.mockResolvedValue({ error: new Error("Failed to update profile") });
     renderPanel();
 
     const user = userEvent.setup();
@@ -129,7 +130,7 @@ describe("SettingsPanel", () => {
   });
 
   it("updates theme and unit selections", async () => {
-    upsertUserProfileMock.mockResolvedValue({ id: "user-123" } as any);
+    profilesUpsertMock.mockResolvedValue({ error: null });
     renderPanel();
 
     const unitSelect = screen.getByLabelText("settings.unit") as HTMLSelectElement;
@@ -190,4 +191,5 @@ describe("SettingsPanel", () => {
     expect(screen.getByText("Settings updated")).toBeInTheDocument();
     expect(window.localStorage.getItem("strong-web-settings-success")).toBeNull();
   });
+
 });

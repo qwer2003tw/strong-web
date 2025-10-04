@@ -88,6 +88,34 @@ export type Messages = {
       label: string;
       volume: string;
     };
+    oneRm: {
+      title: string;
+      lastSynced: string;
+      rangeLabel: string;
+      methodLabel: string;
+      range: {
+        "7d": string;
+        "30d": string;
+        "90d": string;
+      };
+      method: {
+        epley: string;
+        brzycki: string;
+      };
+      tooltip: {
+        label: string;
+      };
+      empty: {
+        title: string;
+        description: string;
+      };
+      best: {
+        title: string;
+        noData: string;
+        performedOn: string;
+        setSummary: string;
+      };
+    };
   };
 };
 
@@ -178,6 +206,34 @@ const messages: Record<Locale, Messages> = {
         label: "Total volume",
         volume: "kg",
       },
+      oneRm: {
+        title: "Estimated 1RM",
+        lastSynced: "Updated {timestamp}",
+        rangeLabel: "Range",
+        methodLabel: "Formula",
+        range: {
+          "7d": "7 days",
+          "30d": "30 days",
+          "90d": "90 days",
+        },
+        method: {
+          epley: "Epley",
+          brzycki: "Brzycki",
+        },
+        tooltip: {
+          label: "Estimated 1RM ({date})",
+        },
+        empty: {
+          title: "No 1RM data yet",
+          description: "Record weighted sets to see your projected one rep max trends.",
+        },
+        best: {
+          title: "Recent best",
+          noData: "Log more heavy sets to surface your latest PRs.",
+          performedOn: "Performed on {date}",
+          setSummary: "Top set: {weight}{unit} × {reps} reps",
+        },
+      },
     },
   },
   zh: {
@@ -265,6 +321,34 @@ const messages: Record<Locale, Messages> = {
       tooltip: {
         label: "總訓練量",
         volume: "公斤",
+      },
+      oneRm: {
+        title: "1RM 趨勢",
+        lastSynced: "更新時間 {timestamp}",
+        rangeLabel: "期間",
+        methodLabel: "公式",
+        range: {
+          "7d": "7 天",
+          "30d": "30 天",
+          "90d": "90 天",
+        },
+        method: {
+          epley: "Epley",
+          brzycki: "Brzycki",
+        },
+        tooltip: {
+          label: "估算 1RM ({date})",
+        },
+        empty: {
+          title: "尚無 1RM 資料",
+          description: "紀錄負重訓練即可看到 1RM 走勢。",
+        },
+        best: {
+          title: "近期最佳",
+          noData: "記錄更多高重量組即可看到 PR。",
+          performedOn: "完成於 {date}",
+          setSummary: "頂組：{weight}{unit} × {reps} 次",
+        },
       },
     },
   },

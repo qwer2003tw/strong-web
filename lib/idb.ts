@@ -1,4 +1,5 @@
 import { openDB, type IDBPDatabase } from "idb";
+import type { OneRepMaxMethod, OneRepMaxRange } from "@/lib/analytics/oneRepMax";
 
 const DB_NAME = "strong-web-cache";
 const STORE_NAME = "readonly";
@@ -11,6 +12,10 @@ export function historySnapshotKey(range: HistoryCacheRange) {
 }
 
 export const HISTORY_SUMMARY_CACHE_KEY = "history:summary";
+
+export function oneRepMaxCacheKey(range: OneRepMaxRange, method: OneRepMaxMethod) {
+  return `history:one-rm:${method}:${range}`;
+}
 
 interface CacheEntry<T> {
   value: T;

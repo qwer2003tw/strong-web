@@ -69,6 +69,9 @@ export function unwrapApiResponse<T>(response: ApiResponse<T>, fallbackMessage: 
       // service friendly error instance.
       (enriched as Error & { cause?: unknown }).cause = error.cause;
     }
+    if (typeof error.status !== "undefined") {
+      (enriched as Error & { status?: number }).status = error.status;
+    }
     throw enriched;
   }
   if (response.data === null) {

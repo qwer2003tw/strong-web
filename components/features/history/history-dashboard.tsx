@@ -15,6 +15,7 @@ import { Alert } from "@/components/ui/alert";
 import { HistoryFilters } from "@/components/features/history/history-filters";
 import { HistoryTrendChart } from "@/components/features/history/history-trend-chart";
 import { HistoryList } from "@/components/features/history/history-list";
+import { OneRepMaxSection } from "@/components/features/history/one-rep-max/one-rep-max-section";
 
 interface HistoryDashboardProps {
   initialHistory: HistoryEntry[];
@@ -189,6 +190,7 @@ export function HistoryDashboard({
           </CardContent>
         </Card>
       </div>
+      <OneRepMaxSection />
       <HistoryList entries={history} />
     </div>
   );

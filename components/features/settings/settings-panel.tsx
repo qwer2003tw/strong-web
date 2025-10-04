@@ -95,11 +95,19 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
     }
     if (typeof window !== "undefined") {
       window.localStorage.setItem(successStorageKey, "Settings updated");
-      // Use full page reload to ensure locale change takes effect properly
-      window.location.reload();
-    } else {
+      if ("caches" in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+        } catch (cacheError) {
+          console.debug("SettingsPanel: unable to clear caches after locale update", cacheError);
+        }
+      }
       router.refresh();
+      return;
     }
+
+    router.refresh();
   }
 
   async function handleExport() {

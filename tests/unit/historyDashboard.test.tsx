@@ -34,6 +34,10 @@ jest.mock("@/components/features/history/history-list", () => ({
   ),
 }));
 
+jest.mock("@/components/features/history/one-rep-max/one-rep-max-section", () => ({
+  OneRepMaxSection: () => <div data-testid="one-rm-section" />,
+}));
+
 describe("HistoryDashboard", () => {
   const mockReadCache = readCache as jest.MockedFunction<typeof readCache>;
   const mockWriteCache = writeCache as jest.MockedFunction<typeof writeCache>;

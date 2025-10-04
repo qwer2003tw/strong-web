@@ -1,5 +1,7 @@
 import type { Database } from "@/types/db";
 
+export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+export type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
 export type WorkoutRow = Database["public"]["Tables"]["workouts"]["Row"];
 export type WorkoutInsert = Database["public"]["Tables"]["workouts"]["Insert"];
 export type WorkoutEntryRow = Database["public"]["Tables"]["workout_entries"]["Row"];
@@ -12,6 +14,7 @@ type WorkoutWithEntries = WorkoutRow & {
 
 export type MockSupabaseStore = {
   userId: string;
+  profiles: ProfileRow[];
   workouts: WorkoutRow[];
   workoutEntries: WorkoutEntryRow[];
   exercises: ExerciseRow[];
@@ -43,6 +46,19 @@ function createDefaultStore(): MockSupabaseStore {
   const now = isoNow();
   return {
     userId: "mock-user",
+    profiles: [
+      {
+        id: "mock-user",
+        email: "mock@example.com",
+        full_name: "Mock User",
+        avatar_url: null,
+        locale: "en",
+        theme: "system",
+        unit_preference: "metric",
+        created_at: now,
+        updated_at: now,
+      },
+    ],
     workouts: [
       {
         id: "workout-1",
@@ -118,6 +134,7 @@ export function resetMockSupabaseStore(partial?: Partial<MockSupabaseStore>) {
   const defaultStore = createDefaultStore();
   const nextStore: MockSupabaseStore = {
     userId: partial?.userId ?? defaultStore.userId,
+    profiles: partial?.profiles ?? defaultStore.profiles.map((profile) => ({ ...profile })),
     workouts: partial?.workouts ?? defaultStore.workouts.map((workout) => ({ ...workout })),
     workoutEntries:
       partial?.workoutEntries ?? defaultStore.workoutEntries.map((entry) => ({ ...entry })),
@@ -168,6 +185,137 @@ function cloneWorkoutWithEntries(workout: WorkoutRow, selection?: string): Worko
 
 function applyFilters<T extends Record<string, unknown>>(records: T[], filters: [string, unknown][]) {
   return records.filter((record) => filters.every(([column, value]) => record[column] === value));
+}
+
+class ProfilesSelectBuilder {
+  constructor(_selection: string | undefined, private filters: [string, unknown][] = []) {}
+
+  eq(column: keyof ProfileRow, value: unknown) {
+    this.filters.push([column as string, value]);
+    return this;
+  }
+
+  abortSignal(_signal: AbortSignal) {
+    return this;
+  }
+
+  async maybeSingle(): MaybeSupabaseResult<ProfileRow> {
+    const store = getMockSupabaseStore();
+    const filtered = applyFilters(store.profiles, this.filters);
+    const record = filtered[0];
+    return { data: record ? { ...record } : null, error: null };
+  }
+
+  async single(): SupabaseResult<ProfileRow> {
+    const result = await this.maybeSingle();
+    if (!result.data) {
+      return { data: null, error: { message: "No rows" } };
+    }
+    return { data: result.data, error: null };
+  }
+}
+
+class ProfilesUpsertSelectBuilder {
+  constructor(private resolveResult: () => SupabaseResult<ProfileRow[]>) {}
+
+  async single(): SupabaseResult<ProfileRow> {
+    const result = await this.resolveResult();
+    if (result.error) {
+      return { data: null, error: result.error };
+    }
+    const record = result.data[0];
+    if (!record) {
+      return { data: null, error: { message: "No rows" } };
+    }
+    return { data: record, error: null };
+  }
+
+  async maybeSingle(): MaybeSupabaseResult<ProfileRow> {
+    const result = await this.resolveResult();
+    if (result.error) {
+      return { data: null, error: result.error };
+    }
+    const record = result.data[0] ?? null;
+    return { data: record, error: null };
+  }
+}
+
+class ProfilesUpsertBuilder {
+  private resultPromise: SupabaseResult<ProfileRow[]> | null = null;
+
+  constructor(private values: ProfileInsert | ProfileInsert[]) {}
+
+  private performUpsert(): SupabaseResult<ProfileRow[]> {
+    const container = getContainer();
+    const { store } = container;
+    const payloads = Array.isArray(this.values) ? this.values : [this.values];
+
+    for (const payload of payloads) {
+      if (!payload.id) {
+        return Promise.resolve({ data: null, error: { message: "Mock Supabase: profiles upsert requires id" } });
+      }
+    }
+
+    const results: ProfileRow[] = [];
+
+    for (const payload of payloads) {
+      const id = payload.id as string;
+      const existingIndex = store.profiles.findIndex((profile) => profile.id === id);
+      const existing = existingIndex >= 0 ? store.profiles[existingIndex] : undefined;
+      const timestamp = isoNow();
+      const nextProfile: ProfileRow = {
+        id,
+        email: payload.email ?? existing?.email ?? null,
+        full_name: payload.full_name ?? existing?.full_name ?? null,
+        avatar_url: payload.avatar_url ?? existing?.avatar_url ?? null,
+        locale: payload.locale ?? existing?.locale ?? "en",
+        theme: payload.theme ?? existing?.theme ?? "system",
+        unit_preference: payload.unit_preference ?? existing?.unit_preference ?? "metric",
+        created_at: existing?.created_at ?? timestamp,
+        updated_at: timestamp,
+      };
+
+      if (existingIndex >= 0) {
+        store.profiles.splice(existingIndex, 1, nextProfile);
+      } else {
+        store.profiles.push(nextProfile);
+      }
+
+      results.push({ ...nextProfile });
+    }
+
+    return Promise.resolve({ data: results, error: null });
+  }
+
+  private ensureResult() {
+    if (!this.resultPromise) {
+      this.resultPromise = this.performUpsert();
+    }
+    return this.resultPromise;
+  }
+
+  abortSignal(_signal: AbortSignal) {
+    return this;
+  }
+
+  select(_selection?: string) {
+    return new ProfilesUpsertSelectBuilder(() => this.ensureResult());
+  }
+
+  execute() {
+    return this.ensureResult();
+  }
+
+  then<TResult1 = Awaited<SupabaseResult<ProfileRow[]>>, TResult2 = never>(
+    resolve?: ((value: Awaited<SupabaseResult<ProfileRow[]>>) => TResult1 | PromiseLike<TResult1>) | null,
+    reject?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+  ) {
+    return this.ensureResult().then(resolve, reject);
+  }
+
+  catch<TResult = never>(reject?: (reason: unknown) => TResult | PromiseLike<TResult>) {
+    return this.ensureResult().catch(reject);
+  }
 }
 
 function orderByScheduled(records: WorkoutRow[], ascending: boolean, nullsFirst?: boolean) {
@@ -414,6 +562,12 @@ export function createMockSupabaseClient() {
   return {
     auth,
     from(table: string) {
+      if (table === "profiles") {
+        return {
+          select: (selection?: string) => new ProfilesSelectBuilder(selection),
+          upsert: (values: ProfileInsert | ProfileInsert[]) => new ProfilesUpsertBuilder(values),
+        };
+      }
       if (table === "workouts") {
         return {
           select: (selection?: string) => new WorkoutsSelectBuilder(selection),
