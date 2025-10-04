@@ -282,38 +282,38 @@ BEGIN
   ),
   ranked_entries AS (
     SELECT
-      entry_id,
-      exercise_id,
-      exercise_name,
-      performed_on,
-      reps,
-      weight,
-      unit,
+      fe.entry_id,
+      fe.exercise_id,
+      fe.exercise_name,
+      fe.performed_on,
+      fe.reps,
+      fe.weight,
+      fe.unit,
       CASE
-        WHEN method_safe = 'brzycki' THEN weight * (36::numeric / (37 - reps))
-        ELSE weight * (1 + reps::numeric / 30)
+        WHEN method_safe = 'brzycki' THEN fe.weight * (36::numeric / (37 - fe.reps))
+        ELSE fe.weight * (1 + fe.reps::numeric / 30)
       END AS estimated_1rm,
       ROW_NUMBER() OVER (
-        PARTITION BY exercise_id, performed_on
+        PARTITION BY fe.exercise_id, fe.performed_on
         ORDER BY
           CASE
-            WHEN method_safe = 'brzycki' THEN weight * (36::numeric / (37 - reps))
-            ELSE weight * (1 + reps::numeric / 30)
+            WHEN method_safe = 'brzycki' THEN fe.weight * (36::numeric / (37 - fe.reps))
+            ELSE fe.weight * (1 + fe.reps::numeric / 30)
           END DESC
       ) AS rank
-    FROM filtered_entries
+    FROM filtered_entries fe
   )
   SELECT
-    exercise_id,
-    exercise_name,
-    performed_on,
-    estimated_1rm,
-    reps,
-    weight,
-    unit,
-    entry_id AS source_entry_id
-  FROM ranked_entries
-  WHERE rank = 1
+    re.exercise_id,
+    re.exercise_name,
+    re.performed_on,
+    re.estimated_1rm,
+    re.reps,
+    re.weight,
+    re.unit,
+    re.entry_id AS source_entry_id
+  FROM ranked_entries re
+  WHERE re.rank = 1
   ORDER BY performed_on ASC, exercise_name ASC;
 END;
 $$;

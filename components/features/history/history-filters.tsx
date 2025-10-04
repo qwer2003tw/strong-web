@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -22,12 +23,20 @@ export function HistoryFilters({
   lastSyncedAt,
 }: HistoryFiltersProps) {
   const t = useTranslations("history");
-  const formattedLastSynced = lastSyncedAt
-    ? new Intl.DateTimeFormat(undefined, {
+  const [formattedLastSynced, setFormattedLastSynced] = useState<string | null>(null);
+
+  // Format timestamp on client-side to avoid hydration mismatch
+  useEffect(() => {
+    if (lastSyncedAt) {
+      const formatted = new Intl.DateTimeFormat(undefined, {
         dateStyle: "medium",
         timeStyle: "short",
-      }).format(new Date(lastSyncedAt))
-    : null;
+      }).format(new Date(lastSyncedAt));
+      setFormattedLastSynced(formatted);
+    } else {
+      setFormattedLastSynced(null);
+    }
+  }, [lastSyncedAt]);
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
