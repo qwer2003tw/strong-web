@@ -2,7 +2,7 @@
 
 **用途 / Purpose**: PWA Service Worker 實作的快速執行摘要 / Quick execution summary for PWA Service Worker implementation  
 **適用對象 / Target Audience**: 開發者快速參考 / Developer quick reference  
-**相關文檔 / Related Documents**: [完整實作計畫](./PWA_SERVICE_WORKER_IMPLEMENTATION_PLAN.md)  
+**相關文檔 / Related Documents**: [完整實作計畫](./GUIDE_PWA_Service_Worker實作計劃.md)
 **最後更新 / Last Updated**: 2025-10-22
 
 ## 快速執行清單 / Quick Execution Checklist
@@ -94,7 +94,7 @@ npx lighthouse http://localhost:3000 --view
 
 ### 📞 支援資源 / Support Resources
 
-- [完整實作計畫](./PWA_SERVICE_WORKER_IMPLEMENTATION_PLAN.md) - 詳細技術規格
+- [完整實作計畫](./GUIDE_PWA_Service_Worker實作計劃.md) - 詳細技術規格
 - [Next.js PWA 官方文檔](https://github.com/shadowwalker/next-pwa)
 - [Workbox 官方指南](https://developers.google.com/web/tools/workbox)
 - Chrome DevTools → Application → Service Workers
