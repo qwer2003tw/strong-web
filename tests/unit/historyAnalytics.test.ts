@@ -1,4 +1,4 @@
-import { buildHistoryTrend, buildVolumeSummary, type HistoryEntry } from "@/lib/history";
+import { buildHistoryTrend, buildVolumeSummary, calculateEntryVolume, type HistoryEntry } from "@/lib/history";
 
 describe("history analytics", () => {
   const referenceDate = new Date("2024-08-01T00:00:00.000Z");
@@ -53,5 +53,36 @@ describe("history analytics", () => {
 
     expect(volume7?.totalVolume).toBe(1800);
     expect(volume30?.totalVolume).toBe(2400);
+  });
+});
+
+describe("calculateEntryVolume", () => {
+  it("calculates volume correctly for valid inputs", () => {
+    expect(calculateEntryVolume(3, 8, 100)).toBe(2400);
+    expect(calculateEntryVolume(4, 12, 50)).toBe(2400);
+    expect(calculateEntryVolume(1, 1, 200)).toBe(200);
+  });
+
+  it("returns 0 when any parameter is null", () => {
+    expect(calculateEntryVolume(null, 8, 100)).toBe(0);
+    expect(calculateEntryVolume(3, null, 100)).toBe(0);
+    expect(calculateEntryVolume(3, 8, null)).toBe(0);
+  });
+
+  it("returns 0 when any parameter is 0", () => {
+    expect(calculateEntryVolume(0, 8, 100)).toBe(0);
+    expect(calculateEntryVolume(3, 0, 100)).toBe(0);
+    expect(calculateEntryVolume(3, 8, 0)).toBe(0);
+  });
+
+  it("handles negative values in calculation", () => {
+    expect(calculateEntryVolume(-1, 8, 100)).toBe(-800);
+    expect(calculateEntryVolume(3, -1, 100)).toBe(-300);
+    expect(calculateEntryVolume(3, 8, -100)).toBe(-2400);
+  });
+
+  it("handles decimal values", () => {
+    expect(calculateEntryVolume(3, 8, 67.5)).toBe(1620);
+    expect(calculateEntryVolume(2, 10, 22.5)).toBe(450);
   });
 });

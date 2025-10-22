@@ -7,7 +7,6 @@ import type { Database, UnitSystem } from "@/types/db";
 import { validateWorkoutForm } from "@/lib/validation";
 import { readCache, writeCache } from "@/lib/idb";
 import { useSupabaseClient } from "@/components/features/providers/supabase-session-provider";
-import { addWorkoutEntry, removeWorkoutEntry } from "@/lib/services/workoutService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -141,9 +140,10 @@ export function WorkoutDetail({ workout, exercises }: WorkoutDetailProps) {
     }
 
     try {
-      const entry = await addWorkoutEntry(
-        workout.id,
-        {
+      const response = await fetch(`/api/workouts/${workout.id}/entries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           exercise_id: payload.exercise_id,
           sets: payload.sets,
           reps: payload.reps ?? null,
@@ -151,10 +151,17 @@ export function WorkoutDetail({ workout, exercises }: WorkoutDetailProps) {
           unit: payload.unit ? (payload.unit as UnitSystem) : null,
           notes: payload.notes || null,
           position: entries.length + 1,
-        },
-        { client: supabase }
-      );
-      setEntries((previous) => [...previous, entry]);
+        }),
+      });
+
+      if (!response.ok) {
+        const body = (await response.json()) as { error?: string };
+        setError(body.error ?? "Unable to add entry");
+        return;
+      }
+
+      const result = (await response.json()) as { data: WorkoutEntryWithExercise };
+      setEntries((previous) => [...previous, result.data]);
       setSuccess("Entry added");
       router.refresh();
     } catch (serviceError) {
@@ -164,7 +171,16 @@ export function WorkoutDetail({ workout, exercises }: WorkoutDetailProps) {
 
   async function handleEntryDelete(id: string) {
     try {
-      await removeWorkoutEntry(workout.id, id, { client: supabase });
+      const response = await fetch(`/api/workouts/${workout.id}/entries/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const body = (await response.json()) as { error?: string };
+        setError(body.error ?? "Unable to remove entry");
+        return;
+      }
+
       setEntries((previous) => previous.filter((entry) => entry.id !== id));
       setSuccess("Entry removed");
       router.refresh();

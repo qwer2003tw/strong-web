@@ -188,7 +188,7 @@ function applyFilters<T extends Record<string, unknown>>(records: T[], filters: 
 }
 
 class ProfilesSelectBuilder {
-  constructor(_selection: string | undefined, private filters: [string, unknown][] = []) {}
+  constructor(_selection: string | undefined, private filters: [string, unknown][] = []) { }
 
   eq(column: keyof ProfileRow, value: unknown) {
     this.filters.push([column as string, value]);
@@ -216,7 +216,7 @@ class ProfilesSelectBuilder {
 }
 
 class ProfilesUpsertSelectBuilder {
-  constructor(private resolveResult: () => SupabaseResult<ProfileRow[]>) {}
+  constructor(private resolveResult: () => SupabaseResult<ProfileRow[]>) { }
 
   async single(): SupabaseResult<ProfileRow> {
     const result = await this.resolveResult();
@@ -243,7 +243,7 @@ class ProfilesUpsertSelectBuilder {
 class ProfilesUpsertBuilder {
   private resultPromise: SupabaseResult<ProfileRow[]> | null = null;
 
-  constructor(private values: ProfileInsert | ProfileInsert[]) {}
+  constructor(private values: ProfileInsert | ProfileInsert[]) { }
 
   private performUpsert(): SupabaseResult<ProfileRow[]> {
     const container = getContainer();
@@ -335,7 +335,7 @@ function orderByScheduled(records: WorkoutRow[], ascending: boolean, nullsFirst?
 }
 
 class WorkoutsSelectBuilder {
-  constructor(private selection: string | undefined, private filters: [string, unknown][] = []) {}
+  constructor(private selection: string | undefined, private filters: [string, unknown][] = []) { }
 
   eq(column: keyof WorkoutRow, value: unknown) {
     this.filters.push([column as string, value]);
@@ -376,7 +376,7 @@ class WorkoutsSelectBuilder {
 class WorkoutsUpdateBuilder {
   private filters: [string, unknown][] = [];
 
-  constructor(private values: Record<string, unknown>) {}
+  constructor(private values: Record<string, unknown>) { }
 
   eq(column: keyof WorkoutRow, value: unknown) {
     this.filters.push([column as string, value]);
@@ -425,7 +425,7 @@ class WorkoutsDeleteBuilder {
 }
 
 class WorkoutsInsertBuilder {
-  constructor(private values: WorkoutInsert | WorkoutInsert[]) {}
+  constructor(private values: WorkoutInsert | WorkoutInsert[]) { }
 
   select(_: string) {
     return {
@@ -455,7 +455,7 @@ class WorkoutsInsertBuilder {
 }
 
 class WorkoutEntriesInsertBuilder {
-  constructor(private values: WorkoutEntryInsert | WorkoutEntryInsert[]) {}
+  constructor(private values: WorkoutEntryInsert | WorkoutEntryInsert[]) { }
 
   select(_: string) {
     return {
@@ -557,6 +557,41 @@ export function createMockSupabaseClient() {
       error: null,
     }),
     signOut: async () => ({ error: null }),
+    signInWithPassword: async (credentials: { email: string; password: string }) => {
+      // Check if there's a window.__supabaseMock with test state
+      if (typeof window !== 'undefined' && (window as any).__supabaseMock) {
+        const mockAuth = (window as any).__supabaseMock.auth;
+        if (mockAuth && typeof mockAuth.signInWithPassword === 'function') {
+          return await mockAuth.signInWithPassword(credentials);
+        }
+      }
+      // Default successful response
+      return { data: { user: { id: getMockSupabaseStore().userId } }, error: null };
+    },
+    signInWithOAuth: async (options: { provider: string }) => {
+      // Check if there's a window.__supabaseMock with test state
+      if (typeof window !== 'undefined' && (window as any).__supabaseMock) {
+        const mockAuth = (window as any).__supabaseMock.auth;
+        if (mockAuth && typeof mockAuth.signInWithOAuth === 'function') {
+          return await mockAuth.signInWithOAuth(options);
+        }
+      }
+      // Default successful response
+      return { data: { user: { id: getMockSupabaseStore().userId } }, error: null };
+    },
+    onAuthStateChange: (callback: (event: string, session: any) => void) => {
+      // Check if there's a window.__supabaseMock with test state
+      if (typeof window !== 'undefined' && (window as any).__supabaseMock) {
+        const mockAuth = (window as any).__supabaseMock.auth;
+        if (mockAuth && typeof mockAuth.onAuthStateChange === 'function') {
+          return mockAuth.onAuthStateChange(callback);
+        }
+      }
+      // Default implementation
+      const subscription = { unsubscribe: () => { } };
+      callback("INITIAL_SESSION", null);
+      return { data: { subscription }, error: null };
+    },
   };
 
   return {

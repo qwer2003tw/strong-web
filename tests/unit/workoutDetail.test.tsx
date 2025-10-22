@@ -159,19 +159,17 @@ describe("WorkoutDetail", () => {
     expect(refreshMock).toHaveBeenCalled();
   });
 
-  it("creates workout entries via Supabase", async () => {
-    insertResult.mockReturnValue({
-      select: () => ({
-        single: async () => ({
-          data: {
-            ...baseEntry,
-            id: "entry-2",
-            exercise_id: "exercise-2",
-            exercises: exercises[1],
-          },
-          error: null,
-        }),
-      }),
+  it("creates workout entries via API", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        data: {
+          ...baseEntry,
+          id: "entry-2",
+          exercise_id: "exercise-2",
+          exercises: exercises[1],
+        }
+      })
     });
 
     render(
@@ -185,18 +183,25 @@ describe("WorkoutDetail", () => {
     await user.selectOptions(screen.getByLabelText("Exercise"), "exercise-2");
     await user.click(screen.getByRole("button", { name: "Add entry" }));
 
-    const entriesHeading = screen.getByRole("heading", { name: "Workout entries" });
-    const entriesContent = entriesHeading.parentElement?.nextElementSibling as HTMLElement;
-
     await waitFor(() => {
-      expect(within(entriesContent).getAllByTestId("workout-entry").length).toBe(1);
+      expect(screen.getByText("Entry added")).toBeInTheDocument();
     });
 
-    expect(insertResult).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/workouts/workout-1/entries",
+      expect.objectContaining({
+        method: "POST",
+      })
+    );
     expect(refreshMock).toHaveBeenCalled();
   });
 
-  it("removes workout entries", async () => {
+  it("removes workout entries via API", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({})
+    });
+
     render(
       <WorkoutDetail
         workout={{ ...baseWorkout, workout_entries: [baseEntry] }}
@@ -208,11 +213,15 @@ describe("WorkoutDetail", () => {
     await user.click(screen.getByRole("button", { name: "Remove" }));
 
     await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+      expect(screen.getByText("Entry removed")).toBeInTheDocument();
     });
 
-    expect(deleteResult).toHaveBeenCalledWith("id", "entry-1");
-    expect(deleteResult).toHaveBeenCalledWith("workout_id", "workout-1");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/workouts/workout-1/entries/entry-1",
+      expect.objectContaining({
+        method: "DELETE",
+      })
+    );
     expect(refreshMock).toHaveBeenCalled();
   });
 });

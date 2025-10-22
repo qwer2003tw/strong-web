@@ -18,9 +18,11 @@ export default async function WorkoutDetailPage({ params }: WorkoutPageParams) {
     notFound();
   }
 
+  const resolvedParams = await params;
+  
   try {
     const [workout, exercises] = await Promise.all([
-      getWorkoutDetail(user.id, params.id),
+      getWorkoutDetail(user.id, resolvedParams.id),
       getUserExercises(user.id),
     ]);
     return <WorkoutDetail workout={workout} exercises={exercises} />;

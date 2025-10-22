@@ -4,6 +4,80 @@
 
 This guide covers how to run tests for the password reset functionality and RLS security features.
 
+## Environment Configuration
+
+### Test Environment Files
+
+The project uses different environment files for different purposes:
+
+- `.env.local` - Development environment
+- `.env.test.local` - Testing environment (E2E tests)
+- `.env.production` - Production environment (future)
+
+### E2E Test Environment
+
+E2E tests use the configuration in `.env.test.local` which contains the same Supabase instance as development. This allows testing against real database operations while keeping environments separate.
+
+## Testing Modes
+
+### Headless vs Headed Mode
+
+**Headless Mode (Default - Recommended for servers)**
+```bash
+pnpm test:e2e --reporter=line
+```
+- Runs browser in background without GUI
+- Faster execution, less resource usage
+- **Required for Amazon Linux 2023 and server environments**
+- Best for CI/CD and automated testing
+
+**Headed Mode (Development only)**
+```bash
+pnpm test:e2e:headed
+```
+- Shows actual browser window during test execution
+- Useful for debugging test failures locally
+- **Not available on server environments without GUI**
+- Only use on local development machines with display
+
+### Server Environment Considerations
+
+When running on **Amazon Linux 2023** or similar server environments:
+
+- ❌ **Never use `--headed`** - servers don't have GUI/display
+- ✅ **Use trace and screenshots for debugging**:
+  ```bash
+  pnpm test:e2e --trace=retain-on-failure
+  pnpm test:e2e --screenshot=only-on-failure
+  ```
+- ✅ **Generate HTML reports**:
+  ```bash
+  pnpm test:e2e --reporter=html
+  ```
+
+### Debugging Failed Tests
+
+**On Local Development:**
+```bash
+# Visual debugging (only on machines with display)
+pnpm test:e2e:headed tests/e2e/auth.spec.ts
+
+# Step-by-step debugging
+playwright test --debug tests/e2e/auth.spec.ts
+```
+
+**On Server Environment:**
+```bash
+# Generate detailed trace files
+pnpm test:e2e --trace=on
+
+# Take screenshots on failure
+pnpm test:e2e --screenshot=only-on-failure --reporter=line
+
+# Create HTML report with all details
+pnpm test:e2e --reporter=html
+```
+
 ## Test Coverage
 
 ### E2E Tests (Playwright)
@@ -258,4 +332,4 @@ open coverage/lcov-report/index.html
 
 ---
 
-**Last Updated**: 2025-10-02
+**Last Updated**: 2025-10-09

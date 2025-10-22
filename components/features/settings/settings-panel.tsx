@@ -45,6 +45,10 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
       if (toastMessage) {
         setMessage(toastMessage);
         delete document.body.dataset.settingsToast;
+        // 同時清除 localStorage，避免訊息重複顯示
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(successStorageKey);
+        }
         return;
       }
     }
@@ -56,6 +60,24 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
     }
   }, [message, successStorageKey]);
 
+  // 自動清除成功訊息
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(null);
+        // 清除所有可能的存儲位置
+        if (typeof document !== "undefined") {
+          delete document.body.dataset.settingsToast;
+        }
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(successStorageKey);
+        }
+      }, 3000); // 3秒後自動清除
+
+      return () => clearTimeout(timer);
+    }
+  }, [message, successStorageKey]);
+
   async function handleProfileSave() {
     setError(null);
     setMessage(null);
@@ -64,6 +86,10 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
       setError("Unable to resolve user");
       return;
     }
+
+    // 記錄原始的語言設定，用於判斷是否需要完整重新載入
+    const originalLocale = profile?.locale ?? defaultLocale;
+    const localeChanged = locale !== originalLocale;
 
     // Get user email from auth
     const { data: { user } } = await supabase.auth.getUser();
@@ -103,7 +129,13 @@ export function SettingsPanel({ profile, userId }: SettingsPanelProps) {
           console.debug("SettingsPanel: unable to clear caches after locale update", cacheError);
         }
       }
-      router.refresh();
+
+      // 如果語言有變更，使用完整頁面重新載入以清除所有快取
+      if (localeChanged) {
+        window.location.reload();
+      } else {
+        router.refresh();
+      }
       return;
     }
 

@@ -23,8 +23,10 @@ export async function GET(_: Request, { params }: Params) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const resolvedParams = await params;
+
   try {
-    const workout = await getWorkoutDetail(user.id, params.id, { client: supabase });
+    const workout = await getWorkoutDetail(user.id, resolvedParams.id, { client: supabase });
     return NextResponse.json({ data: workout });
   } catch (error) {
     console.error("Failed to load workout", error);
@@ -40,6 +42,7 @@ export async function PATCH(request: Request, { params }: Params) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const resolvedParams = await params;
   const payload = await request.json();
 
   if (payload.title) {
@@ -70,7 +73,7 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   try {
-    const workout = await updateWorkout(user.id, params.id, updatePayload, { client: supabase });
+    const workout = await updateWorkout(user.id, resolvedParams.id, updatePayload, { client: supabase });
     return NextResponse.json({ data: workout });
   } catch (error) {
     console.error("Failed to update workout", error);
@@ -86,8 +89,10 @@ export async function DELETE(_: Request, { params }: Params) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const resolvedParams = await params;
+
   try {
-    await deleteWorkout(user.id, params.id, { client: supabase });
+    await deleteWorkout(user.id, resolvedParams.id, { client: supabase });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete workout", error);

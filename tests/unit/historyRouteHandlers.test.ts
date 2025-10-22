@@ -7,6 +7,23 @@ import { getHistorySnapshot, getVolumeSummary } from "@/lib/services/historyServ
 import { getOneRepMaxData } from "@/lib/services/analyticsService";
 import type { OneRepMaxResponsePayload } from "@/lib/analytics/oneRepMax";
 
+// Mock global Response constructor
+global.Response = class MockResponse {
+  status: number;
+  headers: Headers;
+  body: unknown;
+
+  constructor(body: unknown, init?: ResponseInit) {
+    this.status = init?.status ?? 200;
+    this.headers = new Headers(init?.headers);
+    this.body = body;
+  }
+
+  async json() {
+    return this.body;
+  }
+} as any;
+
 jest.mock("next/server", () => ({
   NextResponse: {
     json: (body: unknown, init?: ResponseInit) => {

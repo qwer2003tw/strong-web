@@ -16,7 +16,7 @@ describe("one rep max helpers", () => {
 
   it("caps brzycki reps at 36", () => {
     expect(calculateOneRepMax(120, 10, "brzycki")).toBeCloseTo(160, 1);
-    expect(calculateOneRepMax(60, 50, "brzycki")).toBeCloseTo(1440, 0);
+    expect(calculateOneRepMax(60, 50, "brzycki")).toBeCloseTo(2160, 0);
   });
 
   it("normalises supported methods", () => {

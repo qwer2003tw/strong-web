@@ -1,6 +1,19 @@
-# Strong Web 模組化功能拆解
+# Strong Web 模組化功能拆解 / Strong Web Modular Feature Breakdown
+
+**用途 / Purpose**: 根據 MoSCoW 需求清單，將 Strong Web MVP 的核心能力拆分為模組，描述目標、細項需求、跨模組邊界、預期介面、資產需求與驗收指標 / Break down Strong Web MVP core capabilities into modules based on MoSCoW requirements, describing goals, detailed requirements, inter-module boundaries, expected interfaces, asset requirements, and acceptance criteria  
+**適用對象 / Target Audience**: 產品經理、工程師、設計師、專案經理 / Product Managers, Engineers, Designers, Project Managers  
+**相關文檔 / Related Documents**: [主規格文檔](../specs/spec_1_strong_web_updated.md) | [專案結構](PROJECT_STRUCTURE.md) | [測試報告](../reports/TEST_REPORT.md)  
+**最後更新 / Last Updated**: 2025-10-22
+
+## 快速導覽 / Quick Navigation
+- 如果你要查看整體進度 → 看[進度追蹤表](#進度追蹤表) / If you want to check overall progress → See [Progress Tracking Table](#進度追蹤表)
+- 如果你要了解特定功能模組 → 找到對應模組章節 / If you want to understand specific feature modules → Find the corresponding module section
+- 如果你要開發新功能 → 先查看[相關檔案引用](#📁-相關檔案引用) / If you want to develop new features → Check [Related Files Reference](#📁-相關檔案引用) first
+- 如果你要評估技術依賴 → 查看各模組的跨模組相依章節 / If you want to evaluate technical dependencies → Check the inter-module dependency sections
 
 本文根據 README 中的 MoSCoW 需求清單，將 Strong Web MVP 的核心能力拆分為模組。每一模組皆描述了目標、細項需求、跨模組邊界、預期介面、資產需求與驗收指標，以利產品、工程與設計團隊協作與排程。
+
+This document breaks down the core capabilities of Strong Web MVP into modules based on the MoSCoW requirements list in the README. Each module describes goals, detailed requirements, inter-module boundaries, expected interfaces, asset requirements, and acceptance criteria to facilitate collaboration and scheduling among product, engineering, and design teams.
 
 ## 進度追蹤表
 
@@ -95,34 +108,36 @@
 - **E2E 測試：** `tests/e2e/` (6 個測試檔)
 - **其他配置：** `eslint.config.mjs`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.js`
 
-## Auth 模組
-### 目標與產出
-- 透過 Supabase Auth 提供穩定的帳號註冊、登入、重設密碼與多家社群登入。
-- 建立使用者個人資料初始化流程與必要的行為追蹤（登入成功、失敗）。
+## Auth 模組 / Authentication Module
 
-### 細項需求（對應 MoSCoW）
-- Must：Email/Password、Google、Apple、GitHub OAuth 登入流程；Facebook 作為補充登入方案並須提供同等安全驗證。
-- Should：登入 / 註冊表單的可用性最佳化（鍵盤可達性、狀態提示）。
-- Won't：社群或追蹤類功能不在此模組範疇。
+### 目標與產出 / Goals and Deliverables
+透過 Supabase Auth 提供穩定的帳號註冊、登入、重設密碼與多家社群登入。建立使用者個人資料初始化流程與必要的行為追蹤（登入成功、失敗）。
 
-### 跨模組相依與邊界
-- 對 `Workout/Exercise CRUD`、`歷史與統計`、`設定與偏好` 提供使用者身份資訊與 Session 驗證。
-- 與 `監控與安全` 協作以落實 Row Level Security 與審計需求。
-- 與 `外部 API/整合` 共用 Token 與授權策略，維持 OAuth provider 設定一致。
+Provide stable account registration, login, password reset, and multi-provider social login through Supabase Auth. Establish user profile initialization process and necessary behavior tracking (login success, failure).
 
-### 預期 API / Schema 介面
-- Supabase Auth 內建 `auth.users` 表維護基礎身份資料。
-- `public.profiles` 表（`id`, `email`, `full_name`, `avatar_url`, `locale`, `theme`, `unit_preference`, `created_at`, `updated_at`）。
-- REST 端點：`POST /api/auth/sign-in`、`POST /api/auth/sign-up`、`POST /api/auth/reset`（封裝 Supabase Auth）。
+### 細項需求（對應 MoSCoW）/ Detailed Requirements (MoSCoW)
+- **Must**: Email/Password、Google、Apple、GitHub OAuth 登入流程；Facebook 作為補充登入方案並須提供同等安全驗證 / Email/Password, Google, Apple, GitHub OAuth login flows; Facebook as supplementary login option with equal security verification
+- **Should**: 登入/註冊表單的可用性最佳化（鍵盤可達性、狀態提示）/ Login/registration form usability optimization (keyboard accessibility, status indicators)  
+- **Won't**: 社群或追蹤類功能不在此模組範疇 / Social or tracking features are not within this module scope
 
-### 前/後端資產
-- 前端：登入/註冊頁、第三方登入按鈕（Google/GitHub/Apple/Facebook）、錯誤狀態提示、登入後導引。
-- 後端：OAuth provider 設定（含 Apple Sign In 與 Facebook App 設定）、自訂 email 範本、Edge Function 觸發器同步 `profiles`。
+### 跨模組相依與邊界 / Inter-module Dependencies and Boundaries
+- 對 `Workout/Exercise CRUD`、`歷史與統計`、`設定與偏好` 提供使用者身份資訊與 Session 驗證 / Provide user identity information and session validation to `Workout/Exercise CRUD`, `History & Statistics`, `Settings & Preferences`
+- 與 `監控與安全` 協作以落實 Row Level Security 與審計需求 / Collaborate with `Monitoring & Security` to implement Row Level Security and audit requirements  
+- 與 `外部 API/整合` 共用 Token 與授權策略，維持 OAuth provider 設定一致 / Share Token and authorization strategy with `External API/Integration`, maintain consistent OAuth provider settings
 
-### 驗收指標
-- 主要身分流程成功率 > 99%。
-- 完成 RLS 與最小權限設定，通過滲透測試檢查。
-- 登入流程 Lighthouse 可用性分數 ≥ 90。
+### 預期 API / Schema 介面 / Expected API / Schema Interface
+- Supabase Auth 內建 `auth.users` 表維護基礎身份資料 / Built-in Supabase Auth `auth.users` table maintains basic identity data
+- `public.profiles` 表（`id`, `email`, `full_name`, `avatar_url`, `locale`, `theme`, `unit_preference`, `created_at`, `updated_at`）/ `public.profiles` table with specified fields
+- REST 端點 / REST endpoints：`POST /api/auth/sign-in`、`POST /api/auth/sign-up`、`POST /api/auth/reset`（封裝 Supabase Auth / wrapping Supabase Auth）
+
+### 前/後端資產 / Frontend/Backend Assets
+- **前端 / Frontend**: 登入/註冊頁、第三方登入按鈕（Google/GitHub/Apple/Facebook）、錯誤狀態提示、登入後導引 / Login/registration pages, third-party login buttons, error state indicators, post-login navigation
+- **後端 / Backend**: OAuth provider 設定（含 Apple Sign In 與 Facebook App 設定）、自訂 email 範本、Edge Function 觸發器同步 `profiles` / OAuth provider configuration (including Apple Sign In and Facebook App settings), custom email templates, Edge Function triggers for `profiles` sync
+
+### 驗收指標 / Acceptance Criteria  
+- 主要身分流程成功率 > 99% / Primary identity flow success rate > 99%
+- 完成 RLS 與最小權限設定，通過滲透測試檢查 / Complete RLS and minimum privilege settings, pass penetration testing
+- 登入流程 Lighthouse 可用性分數 ≥ 90 / Login flow Lighthouse accessibility score ≥ 90
 
 ## Workout / Exercise CRUD 模組
 ### 目標與產出
