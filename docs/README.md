@@ -11,7 +11,9 @@
 - [休息計時器規格](./specs/rest-timer-spec.md) - 休息計時器功能規格
 
 ### 🏗️ 架構與開發
+- [專案結構說明](./architecture/PROJECT_STRUCTURE.md) - 專案目錄結構和檔案組織
 - [安全性文檔](./architecture/security.md) - 系統安全架構說明
+- [PWA Service Worker 實作計畫](./development/PWA_SERVICE_WORKER_IMPLEMENTATION_PLAN.md) - PWA 離線功能完整實作指南
 - [Supabase 設定](./setup/supabase-setup.md) - 資料庫設定指南
 - [測試指南](./development/testing-guide.md) - 測試策略和執行方式
 
